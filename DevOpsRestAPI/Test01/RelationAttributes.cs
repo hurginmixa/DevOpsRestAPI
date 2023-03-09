@@ -9,5 +9,8 @@ namespace DeviceProfileSample
 
         [JsonPropertyName("name")] 
         public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("id")] 
+        public int Id { get; set; } = -1;
     }
 }

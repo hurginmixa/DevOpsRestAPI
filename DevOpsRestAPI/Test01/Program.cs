@@ -35,7 +35,7 @@ namespace DeviceProfileSample
                     {
                         string relationUri = relation.Url;
 
-                        string result = GetSubWorkItemList(relationUri).Result;
+                        string result = CustJsonSerializer.FormatJson(GetSubWorkItemList(relationUri).Result);
 
                         WorkItem subWorkItem = JsonSerializer.Deserialize<WorkItem>(result);
                     }
@@ -67,6 +67,8 @@ namespace DeviceProfileSample
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
+
+                uri += "?$expand=relations";
 
                 HttpResponseMessage response = await httpClient.GetAsync(uri);
                 response.EnsureSuccessStatusCode();
