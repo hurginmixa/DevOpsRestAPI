@@ -1,26 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace DeviceProfileSample
 {
-    internal static class Program
+    internal class Program
     {
-        private const string PersonalAccessToken = "sdfax7w2hqrnfucryprws7sdjwkjulwvgsbgwuwopfuvi2t4hbbq";
+        private static readonly string PersonalAccessToken = GetPat();
         private const string Organization = "AzCamtek";
         private const string Project = "Falcon";
 
-        static void Main(string[] args)
+        private static string GetPat()
+        {
+            Assembly assembly = Assembly.GetEntryAssembly();
+            Debug.Assert(assembly != null);
+            
+            Uri uri = new Uri(assembly.CodeBase);
+
+            string directoryName = Path.GetDirectoryName(uri.AbsolutePath);
+            Debug.Assert(directoryName != null);
+
+            return File.ReadAllText(Path.Combine(directoryName, "PAT.txt"));
+        }
+
+        static void Main()
         {
             var workItems = new int[] {39862, 34598, 39309};
 
             string responseBody = GetWorkItemListByIds(workItems).Result;
-            File.WriteAllText(@"c:\Mixa\Mixa.json", CustJsonSerializer.FormatJson(responseBody));
 
             WorkItemList workItemList = JsonSerializer.Deserialize<WorkItemList>(responseBody);
 
@@ -28,24 +42,28 @@ namespace DeviceProfileSample
             {
                 foreach (Relation relation in workItem.Relations)
                 {
-                    if (relation.Attributes.Name == "Child")
+                    if (relation.Attributes.Name != "Child")
                     {
-                        string relationUri = relation.Url;
+                        continue;
+                    }
 
-                        string result = CustJsonSerializer.FormatJson(GetSubWorkItemList(relationUri).Result);
-                        WorkItem subWorkItem = JsonSerializer.Deserialize<WorkItem>(result);
+                    string relationUri = relation.Url;
 
-                        foreach (Relation subRelation in subWorkItem.Relations)
+                    string result = CustJsonSerializer.FormatJson(GetSubWorkItemList(relationUri).Result);
+                    WorkItem subWorkItem = JsonSerializer.Deserialize<WorkItem>(result);
+
+                    foreach (Relation subRelation in subWorkItem.Relations)
+                    {
+                        if (subRelation.Attributes.Name != "Pull Request")
                         {
-                            if (subRelation.Attributes.Name == "Pull Request")
-                            {
-                                string decodedUrl = Uri.UnescapeDataString(subRelation.Url);
-                                string txtId = decodedUrl.Substring(decodedUrl.LastIndexOf('/') + 1);
-
-                                string tt = CustJsonSerializer.FormatJson(GetPullRequsetById(int.Parse(txtId)).Result);
-                                GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(tt);
-                            }
+                            continue;
                         }
+
+                        string decodedUrl = Uri.UnescapeDataString(subRelation.Url);
+                        string txtId = decodedUrl.Substring(decodedUrl.LastIndexOf('/') + 1);
+
+                        string tt = CustJsonSerializer.FormatJson(GetPullRequsetById(int.Parse(txtId)).Result);
+                        GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(tt);
                     }
                 }
             }
