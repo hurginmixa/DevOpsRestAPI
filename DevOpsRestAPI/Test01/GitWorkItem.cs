@@ -3,15 +3,15 @@ using System.Text.Json.Serialization;
 
 namespace DeviceProfileSample
 {
-    public class WorkItem
+    public class GitWorkItem
     {
         [JsonPropertyName("id")]
         public int Id { get; set; }
 
         [JsonPropertyName("fields")]
-        public WorkItemFields Fields { get; set; } = new WorkItemFields();
+        public GitWorkItemFields Fields { get; set; } = new GitWorkItemFields();
 
         [JsonPropertyName("relations")]
-        public Relation[] Relations{ get; set; } = Array.Empty<Relation>();
+        public GitRelation[] Relations{ get; set; } = Array.Empty<GitRelation>();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace DeviceProfileSample
 {
-    public class RelationAttributes
+    public class GitRelationAttributes
     {
         [JsonPropertyName("isLocked")]
         public bool IsLocked { get; set; }

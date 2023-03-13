@@ -2,7 +2,7 @@
 
 namespace DeviceProfileSample
 {
-    public class Person
+    public class GitPerson
     {
         [JsonPropertyName("displayName")]
         public string DisplayName{ get; set; }

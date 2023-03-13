@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -32,39 +33,78 @@ namespace DeviceProfileSample
 
         static void Main()
         {
-            var workItems = new int[] {39862, 34598, 39309};
+            var workItems = new int[] {39862, 34598, 39309, 39559, 39378, 39347, 39523, 39346, 39319, 39967, 39926, 39862, 35781, 39346, 38358, 38280, 37192, 38836};
 
-            string responseBody = GetWorkItemListByIds(workItems).Result;
-
-            WorkItemList workItemList = JsonSerializer.Deserialize<WorkItemList>(responseBody);
-
-            foreach (WorkItem workItem in workItemList.Value)
+            using (TextWriter tw = new StreamWriter(@"c:\temp\mixa.csv"))
             {
-                foreach (Relation relation in workItem.Relations)
+                PerformWorkItems(workItems, tw, 0);
+            }
+
+            Console.WriteLine("Complete");
+        }
+
+        private static void PerformWorkItems(IEnumerable<int> workItems, TextWriter textWriter, int level)
+        {
+            string responseBody = GetWorkItemListByIds(workItems.OrderBy(rr => rr)).Result;
+            GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(responseBody);
+
+            foreach (GitWorkItem gitWorkItem in gitWorkItemList.Value)
+            {
+                Console.WriteLine($"{gitWorkItem.Id} {gitWorkItem.Fields.Title}");
+
+                List<int> childList = new List<int>();
+                List<int> pullRequestList = new List<int>();
+
+                foreach (GitRelation relation in gitWorkItem.Relations)
                 {
-                    if (relation.Attributes.Name != "Child")
+                    if (relation.Attributes.Name == "Child" || relation.Attributes.Name == "Pull Request")
                     {
-                        continue;
-                    }
-
-                    string relationUri = relation.Url;
-
-                    string result = CustJsonSerializer.FormatJson(GetSubWorkItemList(relationUri).Result);
-                    WorkItem subWorkItem = JsonSerializer.Deserialize<WorkItem>(result);
-
-                    foreach (Relation subRelation in subWorkItem.Relations)
-                    {
-                        if (subRelation.Attributes.Name != "Pull Request")
-                        {
-                            continue;
-                        }
-
-                        string decodedUrl = Uri.UnescapeDataString(subRelation.Url);
+                        string decodedUrl = Uri.UnescapeDataString(relation.Url);
                         string txtId = decodedUrl.Substring(decodedUrl.LastIndexOf('/') + 1);
 
-                        string tt = CustJsonSerializer.FormatJson(GetPullRequsetById(int.Parse(txtId)).Result);
-                        GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(tt);
+                        switch (relation.Attributes.Name)
+                        {
+                            case "Child":
+                                childList.Add(int.Parse(txtId));
+                                break;
+
+                            case "Pull Request":
+                                pullRequestList.Add(int.Parse(txtId));
+                                break;
+                        }
                     }
+                }
+
+                textWriter.Write(new string('\t', level));
+                textWriter.Write($"{gitWorkItem.Id},");
+                textWriter.Write($"{gitWorkItem.Fields.WorkItemType},");
+                textWriter.Write($"{gitWorkItem.Fields.State},");
+                textWriter.Write($"\"{gitWorkItem.Fields.Title.Replace("\"", "'")}\"");
+
+                if (pullRequestList.Count > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+
+                    foreach (int i in pullRequestList)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            sb.Append(", ");
+                        }
+
+                        string result = GetPullRequsetById(i).Result;
+                        GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(result);
+                        sb.Append($"{pullRequest.PullRequestId}-{pullRequest.Status} ({pullRequest.TargetRefName.Replace("refs/heads/", "")})");
+                    }
+
+                    textWriter.Write($",\"{sb}\"");
+                }
+
+                textWriter.WriteLine();
+
+                if (childList.Count > 0)
+                {
+                    PerformWorkItems(childList.ToArray(), textWriter, level + 1);
                 }
             }
         }
@@ -76,20 +116,13 @@ namespace DeviceProfileSample
             return await GetStringByUri(uri);
         }
 
-        private static async Task<string> GetWorkItemListByIds(int[] workItems)
+        private static async Task<string> GetWorkItemListByIds(IEnumerable<int> workItems)
         {
             var items = JoinToString(workItems, ",");
 
             var uri = $"https://dev.azure.com/{Organization}/{Project}/_apis/wit/workitems?ids={items}&$expand=all&api-version=7.0";
 
             return await GetStringByUri(uri);
-        }
-
-        private static async Task<string> GetSubWorkItemList(string uri)
-        {
-                uri += "?$expand=relations";
-
-                return await GetStringByUri(uri);
         }
 
         private static async Task<string> GetStringByUri(string uri)

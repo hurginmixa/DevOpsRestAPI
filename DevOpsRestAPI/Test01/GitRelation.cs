@@ -2,7 +2,7 @@
 
 namespace DeviceProfileSample
 {
-    public class Relation
+    public class GitRelation
     {
         [JsonPropertyName("rel")]
         public string Rel { get; set; }
@@ -11,6 +11,6 @@ namespace DeviceProfileSample
         public string Url { get; set; }
 
         [JsonPropertyName("attributes")]
-        public RelationAttributes Attributes { get; set; } = new RelationAttributes();
+        public GitRelationAttributes Attributes { get; set; } = new GitRelationAttributes();
     }
 }
