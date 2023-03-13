@@ -6,15 +6,12 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DeviceProfileSample
 {
     internal static class Program
     {
-        private const string PersonalAccessToken = "";
+        private const string PersonalAccessToken = "sdfax7w2hqrnfucryprws7sdjwkjulwvgsbgwuwopfuvi2t4hbbq";
         private const string Organization = "AzCamtek";
         private const string Project = "Falcon";
 
@@ -36,39 +33,53 @@ namespace DeviceProfileSample
                         string relationUri = relation.Url;
 
                         string result = CustJsonSerializer.FormatJson(GetSubWorkItemList(relationUri).Result);
-
                         WorkItem subWorkItem = JsonSerializer.Deserialize<WorkItem>(result);
+
+                        foreach (Relation subRelation in subWorkItem.Relations)
+                        {
+                            if (subRelation.Attributes.Name == "Pull Request")
+                            {
+                                string decodedUrl = Uri.UnescapeDataString(subRelation.Url);
+                                string txtId = decodedUrl.Substring(decodedUrl.LastIndexOf('/') + 1);
+
+                                string tt = CustJsonSerializer.FormatJson(GetPullRequsetById(int.Parse(txtId)).Result);
+                                GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(tt);
+                            }
+                        }
                     }
                 }
             }
         }
 
+        private static async Task<string> GetPullRequsetById(int id)
+        {
+            var uri = $"https://dev.azure.com/{Organization}/_apis/git/pullrequests/{id}?api-version=7.1-preview.0";
+
+            return await GetStringByUri(uri);
+        }
+
         private static async Task<string> GetWorkItemListByIds(int[] workItems)
         {
-            var pat = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($":{PersonalAccessToken}"));
-            using (var httpClient = new HttpClient())
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
+            var items = JoinToString(workItems, ",");
 
-                var items = JoinToString(workItems, ",");
+            var uri = $"https://dev.azure.com/{Organization}/{Project}/_apis/wit/workitems?ids={items}&$expand=all&api-version=7.0";
 
-                var uri = $"https://dev.azure.com/{Organization}/{Project}/_apis/wit/workitems?ids={items}&$expand=all&api-version=7.0";
-
-                HttpResponseMessage response = await httpClient.GetAsync(uri);
-                response.EnsureSuccessStatusCode();
-
-                return await response.Content.ReadAsStringAsync();
-            }
+            return await GetStringByUri(uri);
         }
 
         private static async Task<string> GetSubWorkItemList(string uri)
         {
+                uri += "?$expand=relations";
+
+                return await GetStringByUri(uri);
+        }
+
+        private static async Task<string> GetStringByUri(string uri)
+        {
             var pat = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($":{PersonalAccessToken}"));
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
-
-                uri += "?$expand=relations";
 
                 HttpResponseMessage response = await httpClient.GetAsync(uri);
                 response.EnsureSuccessStatusCode();
