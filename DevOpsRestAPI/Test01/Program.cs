@@ -33,7 +33,11 @@ namespace DeviceProfileSample
 
         static void Main()
         {
-            var workItems = new int[] {39862, 34598, 39309, 39559, 39378, 39347, 39523, 39346, 39319, 39967, 39926, 39862, 35781, 39346, 38358, 38280, 37192, 38836};
+            var workItems = new int[]
+            {
+                39862, 34598, 39309, 39559, 39378, 39347, 39523, 39346, 39319, 39967, 39926, 39862, 35781, 39346, 38358,
+                38280, 37192, 38836, 37787
+            };
 
             using (TextWriter tw = new StreamWriter(@"c:\temp\mixa.csv"))
             {
@@ -85,14 +89,14 @@ namespace DeviceProfileSample
                 {
                     StringBuilder sb = new StringBuilder();
 
-                    foreach (int i in pullRequestList)
+                    foreach (int id in pullRequestList.OrderBy(rr => rr))
                     {
                         if (sb.Length > 0)
                         {
                             sb.Append(", ");
                         }
 
-                        string result = GetPullRequsetById(i).Result;
+                        string result = GetPullRequsetById(id).Result;
                         GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(result);
                         sb.Append($"{pullRequest.PullRequestId}-{pullRequest.Status} ({pullRequest.TargetRefName.Replace("refs/heads/", "")})");
                     }
