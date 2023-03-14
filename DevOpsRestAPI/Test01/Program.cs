@@ -18,36 +18,255 @@ namespace DeviceProfileSample
         private const string Organization = "AzCamtek";
         private const string Project = "Falcon";
 
-        private static string GetPat()
+        #region private class WorkItem
+
+        private class WorkItem
         {
-            Assembly assembly = Assembly.GetEntryAssembly();
-            Debug.Assert(assembly != null);
-            
-            Uri uri = new Uri(assembly.CodeBase);
+            private readonly int _id;
+            private readonly string _workItemType;
+            private readonly string _state;
+            private readonly string _title;
+           
+            private readonly WorkItemList _workItemList = new WorkItemList();
+            private readonly List<PullRequest> _pullRequestList = new List<PullRequest>();
 
-            string directoryName = Path.GetDirectoryName(uri.AbsolutePath);
-            Debug.Assert(directoryName != null);
+            public WorkItem(int id, string workItemType, string state, string title)
+            {
+                _id = id;
+                _workItemType = workItemType;
+                _state = state;
+                _title = title;
+            }
 
-            return File.ReadAllText(Path.Combine(directoryName, "PAT.txt"));
+            public IWorkItemList SubItems => _workItemList;
+
+            public IEnumerable<PullRequest> PullRequestList => _pullRequestList;
+
+            public IEnumerable<PullRequest> GetFullPullRequestList()
+            {
+                HashSet<PullRequest> pullRequests = new HashSet<PullRequest>();
+
+                foreach (var pullRequest in PullRequestList)
+                {
+                    pullRequests.Add(pullRequest);
+                }
+
+                foreach (var subItem in SubItems.GetWorkItems())
+                {
+                    foreach (var pullRequest in subItem.PullRequestList)
+                    {
+                        pullRequests.Add(pullRequest);
+                    }
+                }
+
+                return pullRequests;
+            }
+
+
+            public void AddPullRequest(PullRequest pullRequest)
+            {
+                _pullRequestList.Add(pullRequest);
+            }
+
+            public int Id => _id;
+
+            public string WorkItemType => _workItemType;
+
+            public string State => _state;
+
+            public string Title => _title;
         }
+
+        #endregion
+
+        #region private class PullRequest
+
+        private class PullRequest
+        {
+            private readonly int _id;
+            private readonly string _status;
+            private readonly string _targetRefName;
+
+            public PullRequest(int id, string status, string targetRefName)
+            {
+                _id = id;
+                _status = status;
+                _targetRefName = targetRefName;
+            }
+
+            public int Id => _id;
+
+            public string Status => _status;
+
+            public string TargetRefName => _targetRefName;
+
+            protected bool Equals(PullRequest other)
+            {
+                return _id == other._id && _status == other._status && _targetRefName == other._targetRefName;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((PullRequest) obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return _id;
+            }
+        }
+
+        #endregion
+
+        #region private interface IWorkItemList
+
+        private interface IWorkItemList
+        {
+            void AddWorkItem(WorkItem item);
+
+            IEnumerable<WorkItem> GetWorkItems();
+        }
+
+        #endregion
+
+        #region private class WorkItemList : IWorkItemList
+
+        private class WorkItemList : IWorkItemList
+        {
+            private readonly List<WorkItem> _list = new List<WorkItem>();
+
+            public void AddWorkItem(WorkItem item)
+            {
+                _list.Add(item);
+            }
+
+            public IEnumerable<WorkItem> GetWorkItems() => _list;
+        }
+
+        #endregion
 
         static void Main()
         {
             var workItems = new int[]
             {
-                39862, 34598, 39309, 39559, 39378, 39347, 39523, 39346, 39319, 39967, 39926, 39862, 35781, 39346, 38358,
-                38280, 37192, 38836, 37787
+                34598, 39309, 39559, 39378, 39347, 39523, 39319,
+                39967, 39926, 39862, 35781, 39346, 38358,
+                38280, 37192, 38836, 37787, 40044,
             };
 
-            using (TextWriter tw = new StreamWriter(@"c:\temp\mixa.csv"))
-            {
-                PerformWorkItems(workItems, tw, 0);
-            }
+            WorkItemList workItemList = new WorkItemList();
+
+            PerformWorkItems(workItems, workItemList);
+
+            Console.WriteLine("Printing");
+
+            Print(workItemList);
 
             Console.WriteLine("Complete");
         }
 
-        private static void PerformWorkItems(IEnumerable<int> workItems, TextWriter textWriter, int level)
+        private static IEnumerable<string> GetUniquePath(IWorkItemList workItemList)
+        {
+            HashSet<string> hashSet = new HashSet<string>();
+
+            void SearchLevel(IWorkItemList levelList)
+            {
+                foreach (WorkItem workItem in levelList.GetWorkItems())
+                {
+                    foreach (PullRequest request in workItem.PullRequestList)
+                    {
+                        hashSet.Add(request.TargetRefName);
+                    }
+
+                    SearchLevel(workItem.SubItems);
+                }
+            }
+
+            SearchLevel(workItemList);
+
+            return hashSet;
+        }
+
+        private static void Print(IWorkItemList workItemList)
+        {
+            string[] paths = GetUniquePath(workItemList).OrderBy(t => t).ToArray();
+
+            using (TextWriter textWriter = new StreamWriter(@"c:\temp\mixa.csv"))
+            {
+                textWriter.Write("Id,Type,State,Title");
+                foreach (string path in paths)
+                {
+                    textWriter.Write($",{path}");
+                }
+                textWriter.WriteLine();
+
+                #region void PrintPullRequestList(IEnumerable<PullRequest> pullRequestList)
+
+                void PrintPullRequestList(IEnumerable<PullRequest> pullRequestList)
+                {
+                    if (paths.Length > 0)
+                    {
+                        StringBuilder sb = new StringBuilder();
+
+                        foreach (string path in paths)
+                        {
+                            if (sb.Length > 0)
+                            {
+                                sb.Append(",");
+                            }
+
+                            PullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).ToArray();
+                            if (pullRequests.Length != 0)
+                            {
+                                sb.Append(JoinToString(pullRequests.Select(p => $"{p.Id}-{p.Status}"), ":"));
+                            }
+                            else
+                            {
+                                sb.Append("\"\"");
+                            }
+                        }
+
+                        if (sb.Length > 0)
+                        {
+                            textWriter.Write($",{sb}");
+                        }
+                    }
+                }
+
+                #endregion
+
+                #region void PrintLevel(IWorkItemList levelList, int levelNumber)
+
+                void PrintLevel(IWorkItemList levelList, int levelNumber)
+                {
+                    foreach (WorkItem workItem in levelList.GetWorkItems())
+                    {
+                        textWriter.Write($"{workItem.Id},");
+                        textWriter.Write($"{workItem.WorkItemType},");
+                        textWriter.Write($"{workItem.State},");
+                        textWriter.Write($"\"{new string(' ', levelNumber * 4)}{workItem.Title}\"");
+
+                        PrintPullRequestList(workItem.GetFullPullRequestList());
+
+                        textWriter.WriteLine();
+
+                        //if (workItem.WorkItemType != "Bug" && workItem.WorkItemType != "Feature")
+                        {
+                            PrintLevel(workItem.SubItems, levelNumber + 1);
+                        }
+                    }
+                }
+
+                #endregion
+
+                PrintLevel(workItemList, 0);
+            }
+        }
+
+        private static void PerformWorkItems(IEnumerable<int> workItems, IWorkItemList workItemList)
         {
             string responseBody = GetWorkItemListByIds(workItems.OrderBy(rr => rr)).Result;
             GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(responseBody);
@@ -79,41 +298,28 @@ namespace DeviceProfileSample
                     }
                 }
 
-                textWriter.Write(new string('\t', level));
-                textWriter.Write($"{gitWorkItem.Id},");
-                textWriter.Write($"{gitWorkItem.Fields.WorkItemType},");
-                textWriter.Write($"{gitWorkItem.Fields.State},");
-                textWriter.Write($"\"{gitWorkItem.Fields.Title.Replace("\"", "'")}\"");
+                WorkItem workItem = new WorkItem(id: gitWorkItem.Id, workItemType: gitWorkItem.Fields.WorkItemType, state: gitWorkItem.Fields.State, title: gitWorkItem.Fields.Title);
+                workItemList.AddWorkItem(workItem);
 
                 if (pullRequestList.Count > 0)
                 {
-                    StringBuilder sb = new StringBuilder();
-
-                    foreach (int id in pullRequestList.OrderBy(rr => rr))
+                    foreach (int pullRequestId in pullRequestList.OrderBy(rr => rr))
                     {
-                        if (sb.Length > 0)
-                        {
-                            sb.Append(", ");
-                        }
-
-                        string result = GetPullRequsetById(id).Result;
+                        string result = GetPullRequestById(pullRequestId).Result;
                         GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(result);
-                        sb.Append($"{pullRequest.PullRequestId}-{pullRequest.Status} ({pullRequest.TargetRefName.Replace("refs/heads/", "")})");
+
+                        workItem.AddPullRequest(new PullRequest(pullRequest.Id, pullRequest.Status, pullRequest.TargetRefName.Replace("refs/heads/", "")));
                     }
-
-                    textWriter.Write($",\"{sb}\"");
                 }
-
-                textWriter.WriteLine();
 
                 if (childList.Count > 0)
                 {
-                    PerformWorkItems(childList.ToArray(), textWriter, level + 1);
+                    PerformWorkItems(childList.ToArray(), workItem.SubItems);
                 }
             }
         }
 
-        private static async Task<string> GetPullRequsetById(int id)
+        private static async Task<string> GetPullRequestById(int id)
         {
             var uri = $"https://dev.azure.com/{Organization}/_apis/git/pullrequests/{id}?api-version=7.1-preview.0";
 
@@ -162,6 +368,19 @@ namespace DeviceProfileSample
             }
 
             return builder.ToString();
+        }
+
+        private static string GetPat()
+        {
+            Assembly assembly = Assembly.GetEntryAssembly();
+            Debug.Assert(assembly != null);
+            
+            Uri uri = new Uri(assembly.CodeBase);
+
+            string directoryName = Path.GetDirectoryName(uri.AbsolutePath);
+            Debug.Assert(directoryName != null);
+
+            return File.ReadAllText(Path.Combine(directoryName, "PAT.txt"));
         }
     }
 }

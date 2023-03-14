@@ -5,7 +5,7 @@ namespace DeviceProfileSample
     public class GitPullRequest
     {
         [JsonPropertyName("pullRequestId")]
-        public int PullRequestId { get; set; }
+        public int Id { get; set; }
 
         [JsonPropertyName("codeReviewId")]
         public int CodeReviewId { get; set; }
