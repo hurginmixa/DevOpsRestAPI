@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace DeviceProfileSample
 {
@@ -24,6 +25,12 @@ namespace DeviceProfileSample
 
         [JsonPropertyName("mergeStatus")]
         public string MergeStatus { get; set; }
+
+        [JsonPropertyName("creationDate")]
+        public DateTime CreationDate { get; set; }
+
+        [JsonPropertyName("closedDate")]
+        public DateTime ClosedDate { get; set; }
 
         [JsonPropertyName("repository")] 
         public GitRepository Repository { get; set; } = new GitRepository();

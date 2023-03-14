@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DeviceProfileSample
@@ -26,7 +27,7 @@ namespace DeviceProfileSample
             private readonly string _workItemType;
             private readonly string _state;
             private readonly string _title;
-           
+
             private readonly WorkItemList _workItemList = new WorkItemList();
             private readonly List<PullRequest> _pullRequestList = new List<PullRequest>();
 
@@ -53,7 +54,7 @@ namespace DeviceProfileSample
 
                 foreach (var subItem in SubItems.GetWorkItems())
                 {
-                    foreach (var pullRequest in subItem.PullRequestList)
+                    foreach (var pullRequest in subItem.GetFullPullRequestList())
                     {
                         pullRequests.Add(pullRequest);
                     }
@@ -61,7 +62,6 @@ namespace DeviceProfileSample
 
                 return pullRequests;
             }
-
 
             public void AddPullRequest(PullRequest pullRequest)
             {
@@ -86,17 +86,21 @@ namespace DeviceProfileSample
             private readonly int _id;
             private readonly string _status;
             private readonly string _targetRefName;
+            private readonly DateTime _closeDate;
 
-            public PullRequest(int id, string status, string targetRefName)
+            public PullRequest(int id, string status, string targetRefName, DateTime closeDate)
             {
                 _id = id;
                 _status = status;
                 _targetRefName = targetRefName;
+                _closeDate = closeDate;
             }
 
             public int Id => _id;
 
             public string Status => _status;
+
+            public DateTime CloseDate => _closeDate;
 
             public string TargetRefName => _targetRefName;
 
@@ -159,7 +163,7 @@ namespace DeviceProfileSample
 
             WorkItemList workItemList = new WorkItemList();
 
-            PerformWorkItems(workItems, workItemList);
+            PerformWorkItems(workItems, workItemList).Wait();
 
             Console.WriteLine("Printing");
 
@@ -201,6 +205,7 @@ namespace DeviceProfileSample
                 {
                     textWriter.Write($",{path}");
                 }
+
                 textWriter.WriteLine();
 
                 #region void PrintPullRequestList(IEnumerable<PullRequest> pullRequestList)
@@ -221,7 +226,7 @@ namespace DeviceProfileSample
                             PullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).ToArray();
                             if (pullRequests.Length != 0)
                             {
-                                sb.Append(JoinToString(pullRequests.Select(p => $"{p.Id}-{p.Status}"), ":"));
+                                sb.Append(JoinToString(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
                             }
                             else
                             {
@@ -266,14 +271,14 @@ namespace DeviceProfileSample
             }
         }
 
-        private static void PerformWorkItems(IEnumerable<int> workItems, IWorkItemList workItemList)
+        private static async Task PerformWorkItems(IEnumerable<int> workItems, IWorkItemList workItemList)
         {
-            string responseBody = GetWorkItemListByIds(workItems.OrderBy(rr => rr)).Result;
+            string responseBody = await GetWorkItemListByIds(workItems.OrderBy(rr => rr));
             GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(responseBody);
 
             foreach (GitWorkItem gitWorkItem in gitWorkItemList.Value)
             {
-                Console.WriteLine($"{gitWorkItem.Id} {gitWorkItem.Fields.Title}");
+                Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} {gitWorkItem.Id} {gitWorkItem.Fields.Title}");
 
                 List<int> childList = new List<int>();
                 List<int> pullRequestList = new List<int>();
@@ -305,16 +310,16 @@ namespace DeviceProfileSample
                 {
                     foreach (int pullRequestId in pullRequestList.OrderBy(rr => rr))
                     {
-                        string result = GetPullRequestById(pullRequestId).Result;
+                        string result = CustJsonSerializer.FormatJson(await GetPullRequestById(pullRequestId));
                         GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(result);
 
-                        workItem.AddPullRequest(new PullRequest(pullRequest.Id, pullRequest.Status, pullRequest.TargetRefName.Replace("refs/heads/", "")));
+                        workItem.AddPullRequest(new PullRequest(pullRequest.Id, pullRequest.Status, pullRequest.TargetRefName.Replace("refs/heads/", ""), pullRequest.ClosedDate.ToLocalTime()));
                     }
                 }
 
                 if (childList.Count > 0)
                 {
-                    PerformWorkItems(childList.ToArray(), workItem.SubItems);
+                    await PerformWorkItems(childList.ToArray(), workItem.SubItems);
                 }
             }
         }
@@ -374,7 +379,7 @@ namespace DeviceProfileSample
         {
             Assembly assembly = Assembly.GetEntryAssembly();
             Debug.Assert(assembly != null);
-            
+
             Uri uri = new Uri(assembly.CodeBase);
 
             string directoryName = Path.GetDirectoryName(uri.AbsolutePath);
