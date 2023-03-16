@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace DeviceProfileSample
+namespace Test01.GitClasses
 {
     public class GitRepository
     {

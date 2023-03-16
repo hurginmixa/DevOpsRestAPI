@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-namespace DeviceProfileSample
+namespace Test01
 {
     internal static class CustJsonSerializer
     {

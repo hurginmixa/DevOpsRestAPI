@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Test01.GitClasses;
 
-namespace DeviceProfileSample
+namespace Test01
 {
     internal class Program
     {
-        private static readonly string PersonalAccessToken = GetPat();
-        private const string Organization = "AzCamtek";
-        private const string Project = "Falcon";
+        private static readonly int[] WorkItems = {
+            34598, 39309, 39559, 39378, 39347, 39523, 39319,
+            39967, 39926, 39862, 35781, 39346, 38358,
+            38280, 37192, 38836, 37787, 40044, 33462,
+            32807,
+        };
 
         #region private class WorkItem
 
@@ -152,18 +152,11 @@ namespace DeviceProfileSample
 
         #endregion
 
-        static void Main()
+        static async Task Main()
         {
-            var workItems = new int[]
-            {
-                34598, 39309, 39559, 39378, 39347, 39523, 39319,
-                39967, 39926, 39862, 35781, 39346, 38358,
-                38280, 37192, 38836, 37787, 40044,
-            };
-
             WorkItemList workItemList = new WorkItemList();
 
-            PerformWorkItems(workItems, workItemList).Wait();
+            await PerformWorkItems(WorkItems, workItemList);
 
             Console.WriteLine("Printing");
 
@@ -226,7 +219,7 @@ namespace DeviceProfileSample
                             PullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).ToArray();
                             if (pullRequests.Length != 0)
                             {
-                                sb.Append(JoinToString(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
+                                sb.Append(Tools.JoinToString(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
                             }
                             else
                             {
@@ -273,7 +266,7 @@ namespace DeviceProfileSample
 
         private static async Task PerformWorkItems(IEnumerable<int> workItems, IWorkItemList workItemList)
         {
-            string responseBody = await GetWorkItemListByIds(workItems.OrderBy(rr => rr));
+            string responseBody = await HttpTools.GetWorkItemListByIds(workItems.OrderBy(rr => rr));
             GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(responseBody);
 
             foreach (GitWorkItem gitWorkItem in gitWorkItemList.Value)
@@ -310,7 +303,7 @@ namespace DeviceProfileSample
                 {
                     foreach (int pullRequestId in pullRequestList.OrderBy(rr => rr))
                     {
-                        string result = CustJsonSerializer.FormatJson(await GetPullRequestById(pullRequestId));
+                        string result = CustJsonSerializer.FormatJson(await HttpTools.GetPullRequestById(pullRequestId));
                         GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(result);
 
                         workItem.AddPullRequest(new PullRequest(pullRequest.Id, pullRequest.Status, pullRequest.TargetRefName.Replace("refs/heads/", ""), pullRequest.ClosedDate.ToLocalTime()));
@@ -322,70 +315,6 @@ namespace DeviceProfileSample
                     await PerformWorkItems(childList.ToArray(), workItem.SubItems);
                 }
             }
-        }
-
-        private static async Task<string> GetPullRequestById(int id)
-        {
-            var uri = $"https://dev.azure.com/{Organization}/_apis/git/pullrequests/{id}?api-version=7.1-preview.0";
-
-            return await GetStringByUri(uri);
-        }
-
-        private static async Task<string> GetWorkItemListByIds(IEnumerable<int> workItems)
-        {
-            var items = JoinToString(workItems, ",");
-
-            var uri = $"https://dev.azure.com/{Organization}/{Project}/_apis/wit/workitems?ids={items}&$expand=all&api-version=7.0";
-
-            return await GetStringByUri(uri);
-        }
-
-        private static async Task<string> GetStringByUri(string uri)
-        {
-            var pat = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($":{PersonalAccessToken}"));
-            using (var httpClient = new HttpClient())
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
-
-                HttpResponseMessage response = await httpClient.GetAsync(uri);
-                response.EnsureSuccessStatusCode();
-
-                return await response.Content.ReadAsStringAsync();
-            }
-        }
-
-        private static string JoinToString<T>(IEnumerable<T> enumerable, string delimiter)
-        {
-            IEnumerator<T> enumerator = enumerable.GetEnumerator();
-
-            if (!enumerator.MoveNext())
-            {
-                return string.Empty;
-            }
-
-            StringBuilder builder = new StringBuilder();
-            builder.Append(enumerator.Current);
-
-            while (enumerator.MoveNext())
-            {
-                builder.Append(delimiter);
-                builder.Append(enumerator.Current);
-            }
-
-            return builder.ToString();
-        }
-
-        private static string GetPat()
-        {
-            Assembly assembly = Assembly.GetEntryAssembly();
-            Debug.Assert(assembly != null);
-
-            Uri uri = new Uri(assembly.CodeBase);
-
-            string directoryName = Path.GetDirectoryName(uri.AbsolutePath);
-            Debug.Assert(directoryName != null);
-
-            return File.ReadAllText(Path.Combine(directoryName, "PAT.txt"));
         }
     }
 }
