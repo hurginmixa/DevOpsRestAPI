@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Test01
@@ -29,7 +30,7 @@ namespace Test01
 
         private static async Task<string> GetStringByUri(string uri)
         {
-            var pat = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($":{PatContainer.PersonalAccessToken}"));
+            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{PatContainer.PersonalAccessToken}"));
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);

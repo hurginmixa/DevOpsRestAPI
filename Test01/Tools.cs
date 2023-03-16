@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using Test01.DocumentClasses;
 
 namespace Test01
 {
@@ -24,6 +25,28 @@ namespace Test01
             }
 
             return builder.ToString();
+        }
+
+        public static IEnumerable<string> GetUniquePath(IDocumentWorkItemList workItemList)
+        {
+            HashSet<string> hashSet = new HashSet<string>();
+
+            void SearchLevel(IDocumentWorkItemList levelList)
+            {
+                foreach (DocumentWorkItem workItem in levelList.GetWorkItems())
+                {
+                    foreach (DocumentPullRequest request in workItem.PullRequestList)
+                    {
+                        hashSet.Add(request.TargetRefName);
+                    }
+
+                    SearchLevel(workItem.SubItems);
+                }
+            }
+
+            SearchLevel(workItemList);
+
+            return hashSet;
         }
     }
 }

@@ -6,268 +6,198 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Test01.GitClasses;
+using Microsoft.Office.Interop.Excel;
+using Test01.DocumentClasses;
 
 namespace Test01
 {
-    internal class Program
+    public static class Program
     {
-        private static readonly int[] WorkItems = {
+        private static readonly int[] WorkItems =
+        {
             34598, 39309, 39559, 39378, 39347, 39523, 39319,
             39967, 39926, 39862, 35781, 39346, 38358,
             38280, 37192, 38836, 37787, 40044, 33462,
             32807,
         };
 
-        #region private class WorkItem
-
-        private class WorkItem
-        {
-            private readonly int _id;
-            private readonly string _workItemType;
-            private readonly string _state;
-            private readonly string _title;
-
-            private readonly WorkItemList _workItemList = new WorkItemList();
-            private readonly List<PullRequest> _pullRequestList = new List<PullRequest>();
-
-            public WorkItem(int id, string workItemType, string state, string title)
-            {
-                _id = id;
-                _workItemType = workItemType;
-                _state = state;
-                _title = title;
-            }
-
-            public IWorkItemList SubItems => _workItemList;
-
-            public IEnumerable<PullRequest> PullRequestList => _pullRequestList;
-
-            public IEnumerable<PullRequest> GetFullPullRequestList()
-            {
-                HashSet<PullRequest> pullRequests = new HashSet<PullRequest>();
-
-                foreach (var pullRequest in PullRequestList)
-                {
-                    pullRequests.Add(pullRequest);
-                }
-
-                foreach (var subItem in SubItems.GetWorkItems())
-                {
-                    foreach (var pullRequest in subItem.GetFullPullRequestList())
-                    {
-                        pullRequests.Add(pullRequest);
-                    }
-                }
-
-                return pullRequests;
-            }
-
-            public void AddPullRequest(PullRequest pullRequest)
-            {
-                _pullRequestList.Add(pullRequest);
-            }
-
-            public int Id => _id;
-
-            public string WorkItemType => _workItemType;
-
-            public string State => _state;
-
-            public string Title => _title;
-        }
-
-        #endregion
-
-        #region private class PullRequest
-
-        private class PullRequest
-        {
-            private readonly int _id;
-            private readonly string _status;
-            private readonly string _targetRefName;
-            private readonly DateTime _closeDate;
-
-            public PullRequest(int id, string status, string targetRefName, DateTime closeDate)
-            {
-                _id = id;
-                _status = status;
-                _targetRefName = targetRefName;
-                _closeDate = closeDate;
-            }
-
-            public int Id => _id;
-
-            public string Status => _status;
-
-            public DateTime CloseDate => _closeDate;
-
-            public string TargetRefName => _targetRefName;
-
-            protected bool Equals(PullRequest other)
-            {
-                return _id == other._id && _status == other._status && _targetRefName == other._targetRefName;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((PullRequest) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return _id;
-            }
-        }
-
-        #endregion
-
-        #region private interface IWorkItemList
-
-        private interface IWorkItemList
-        {
-            void AddWorkItem(WorkItem item);
-
-            IEnumerable<WorkItem> GetWorkItems();
-        }
-
-        #endregion
-
-        #region private class WorkItemList : IWorkItemList
-
-        private class WorkItemList : IWorkItemList
-        {
-            private readonly List<WorkItem> _list = new List<WorkItem>();
-
-            public void AddWorkItem(WorkItem item)
-            {
-                _list.Add(item);
-            }
-
-            public IEnumerable<WorkItem> GetWorkItems() => _list;
-        }
-
-        #endregion
-
         static async Task Main()
         {
-            WorkItemList workItemList = new WorkItemList();
+            DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
             await PerformWorkItems(WorkItems, workItemList);
 
             Console.WriteLine("Printing");
 
-            Print(workItemList);
+            PrintHtml(workItemList);
 
             Console.WriteLine("Complete");
         }
 
-        private static IEnumerable<string> GetUniquePath(IWorkItemList workItemList)
+        private static void PrintCsv(IDocumentWorkItemList workItemList)
         {
-            HashSet<string> hashSet = new HashSet<string>();
+            using TextWriter textWriter = new StreamWriter(@"c:\temp\mixa.csv");
 
-            void SearchLevel(IWorkItemList levelList)
+            string[] paths = Tools.GetUniquePath(workItemList).OrderBy(t => t).ToArray();
+
+            textWriter.Write("Id,Type,State,Title");
+            foreach (string path in paths)
             {
-                foreach (WorkItem workItem in levelList.GetWorkItems())
-                {
-                    foreach (PullRequest request in workItem.PullRequestList)
-                    {
-                        hashSet.Add(request.TargetRefName);
-                    }
-
-                    SearchLevel(workItem.SubItems);
-                }
+                textWriter.Write($",{path}");
             }
 
-            SearchLevel(workItemList);
+            textWriter.WriteLine();
 
-            return hashSet;
-        }
+            #region void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
 
-        private static void Print(IWorkItemList workItemList)
-        {
-            string[] paths = GetUniquePath(workItemList).OrderBy(t => t).ToArray();
-
-            using (TextWriter textWriter = new StreamWriter(@"c:\temp\mixa.csv"))
+            void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
             {
-                textWriter.Write("Id,Type,State,Title");
-                foreach (string path in paths)
+                if (paths.Length > 0)
                 {
-                    textWriter.Write($",{path}");
-                }
+                    StringBuilder sb = new StringBuilder();
 
-                textWriter.WriteLine();
-
-                #region void PrintPullRequestList(IEnumerable<PullRequest> pullRequestList)
-
-                void PrintPullRequestList(IEnumerable<PullRequest> pullRequestList)
-                {
-                    if (paths.Length > 0)
+                    foreach (string path in paths)
                     {
-                        StringBuilder sb = new StringBuilder();
-
-                        foreach (string path in paths)
-                        {
-                            if (sb.Length > 0)
-                            {
-                                sb.Append(",");
-                            }
-
-                            PullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).ToArray();
-                            if (pullRequests.Length != 0)
-                            {
-                                sb.Append(Tools.JoinToString(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
-                            }
-                            else
-                            {
-                                sb.Append("\"\"");
-                            }
-                        }
-
                         if (sb.Length > 0)
                         {
-                            textWriter.Write($",{sb}");
+                            sb.Append(",");
                         }
-                    }
-                }
 
-                #endregion
-
-                #region void PrintLevel(IWorkItemList levelList, int levelNumber)
-
-                void PrintLevel(IWorkItemList levelList, int levelNumber)
-                {
-                    foreach (WorkItem workItem in levelList.GetWorkItems())
-                    {
-                        textWriter.Write($"{workItem.Id},");
-                        textWriter.Write($"{workItem.WorkItemType},");
-                        textWriter.Write($"{workItem.State},");
-                        textWriter.Write($"\"{new string(' ', levelNumber * 4)}{workItem.Title}\"");
-
-                        PrintPullRequestList(workItem.GetFullPullRequestList());
-
-                        textWriter.WriteLine();
-
-                        //if (workItem.WorkItemType != "Bug" && workItem.WorkItemType != "Feature")
+                        DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).ToArray();
+                        if (pullRequests.Length != 0)
                         {
-                            PrintLevel(workItem.SubItems, levelNumber + 1);
+                            sb.Append(Tools.JoinToString(
+                                pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
+                        }
+                        else
+                        {
+                            sb.Append("\"\"");
                         }
                     }
+
+                    if (sb.Length > 0)
+                    {
+                        textWriter.Write($",{sb}");
+                    }
                 }
-
-                #endregion
-
-                PrintLevel(workItemList, 0);
             }
+
+            #endregion
+
+            #region void PrintLevel(IDocumentWorkItemList levelList, int levelNumber)
+
+            void PrintLevel(IDocumentWorkItemList levelList, int levelNumber)
+            {
+                foreach (DocumentWorkItem workItem in levelList.GetWorkItems())
+                {
+                    textWriter.Write($"{workItem.Id},");
+                    textWriter.Write($"{workItem.WorkItemType},");
+                    textWriter.Write($"{workItem.State},");
+                    textWriter.Write($"\"{new string(' ', levelNumber * 4)}{workItem.Title}\"");
+
+                    PrintPullRequestList(workItem.GetFullPullRequestList());
+
+                    textWriter.WriteLine();
+
+                    //if (workItem.WorkItemType != "Bug" && workItem.WorkItemType != "Feature")
+                    {
+                        PrintLevel(workItem.SubItems, levelNumber + 1);
+                    }
+                }
+            }
+
+            #endregion
+
+            PrintLevel(workItemList, 0);
         }
 
-        private static async Task PerformWorkItems(IEnumerable<int> workItems, IWorkItemList workItemList)
+        private static void PrintHtml(IDocumentWorkItemList workItemList)
         {
-            string responseBody = await HttpTools.GetWorkItemListByIds(workItems.OrderBy(rr => rr));
-            GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(responseBody);
+            using TextWriter textWriter = new StreamWriter(@"c:\temp\mixa.html");
+
+            string[] paths = Tools.GetUniquePath(workItemList).OrderBy(t => t).ToArray();
+
+            textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
+            textWriter.WriteLine("<html>");
+            textWriter.WriteLine("<head>");
+            textWriter.WriteLine("</head>");
+            textWriter.WriteLine("<body>");
+            textWriter.WriteLine("<table border='1'>");
+
+            textWriter.WriteLine("<tr>");
+            textWriter.WriteLine("<td>Id</td><td>Type</td><td>State</td><td>Title</td>");
+
+            foreach (string path in paths)
+            {
+                textWriter.WriteLine($"<td>{HttpUtility.HtmlAttributeEncode(path)}</td>");
+            }
+
+            textWriter.WriteLine("</tr>");
+
+            void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
+            {
+                if (paths.Length > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+
+                    foreach (string path in paths)
+                    {
+                        sb.Append("<td>");
+
+                        DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).ToArray();
+                        if (pullRequests.Length != 0)
+                        {
+                            sb.Append(Tools.JoinToString(
+                                pullRequests.Select(p =>
+                                {
+                                    return $"<span title='{p.CloseDate:yyyy/MM/dd HH:mm}'>{p.Id}</span>";
+                                }), "&nbsp;"));
+                            //sb.Append(Tools.JoinToString(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
+                        }
+                        else
+                        {
+                            sb.Append("&nbsp;");
+                        }
+
+                        sb.Append("</td>");
+                    }
+
+                    textWriter.Write(sb);
+                }
+            }
+
+            void PrintLevel(IDocumentWorkItemList levelList, int levelNumber)
+            {
+                textWriter.WriteLine("<tr>");
+
+                foreach (DocumentWorkItem workItem in levelList.GetWorkItems())
+                {
+                    textWriter.Write($"<td><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
+                    textWriter.Write($"<td>{workItem.WorkItemType}</td>");
+                    textWriter.Write($"<td>{workItem.State}</td>");
+                    textWriter.Write($"<td>{string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 3))}{workItem.Title}</td>");
+
+                    PrintPullRequestList(workItem.GetFullPullRequestList());
+
+                    textWriter.WriteLine("</tr>");
+
+                    PrintLevel(workItem.SubItems, levelNumber + 1);
+                }
+            }
+
+            PrintLevel(workItemList, 0);
+
+            textWriter.WriteLine("</table>");
+            textWriter.WriteLine("</body>");
+            textWriter.WriteLine("</html>");
+        }
+
+        private static async Task PerformWorkItems(IEnumerable<int> workItems, IDocumentWorkItemList workItemList)
+        {
+            string jsonResponseBody = CustJsonSerializer.FormatJson(await HttpTools.GetWorkItemListByIds(workItems.OrderBy(rr => rr)));
+            GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(jsonResponseBody);
 
             foreach (GitWorkItem gitWorkItem in gitWorkItemList.Value)
             {
@@ -296,7 +226,7 @@ namespace Test01
                     }
                 }
 
-                WorkItem workItem = new WorkItem(id: gitWorkItem.Id, workItemType: gitWorkItem.Fields.WorkItemType, state: gitWorkItem.Fields.State, title: gitWorkItem.Fields.Title);
+                DocumentWorkItem workItem = new DocumentWorkItem(gitWorkItem);
                 workItemList.AddWorkItem(workItem);
 
                 if (pullRequestList.Count > 0)
@@ -306,7 +236,7 @@ namespace Test01
                         string result = CustJsonSerializer.FormatJson(await HttpTools.GetPullRequestById(pullRequestId));
                         GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(result);
 
-                        workItem.AddPullRequest(new PullRequest(pullRequest.Id, pullRequest.Status, pullRequest.TargetRefName.Replace("refs/heads/", ""), pullRequest.ClosedDate.ToLocalTime()));
+                        workItem.AddPullRequest(new DocumentPullRequest(pullRequest));
                     }
                 }
 
