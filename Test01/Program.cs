@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,10 +19,12 @@ namespace Test01
         private static readonly int[] WorkItems =
         {
             34598, 39309, 39559, 39378, 39347, 39523, 39319,
-            39967, 39926, 39862, 35781, 39346, 38358,
+            39967, 39346, 38358,
             38280, 37192, 38836, 37787, 40044, 33462,
-            32807,
+            32807, 40071, 38966, 38968, 39060
         };
+
+        private static readonly string[] BranchPaths = {/*"ver/10.0/dev", "ver/10.0/2023/01/rel", "ver/10.0/2023/03/rel"/**/};
 
         static async Task Main()
         {
@@ -65,11 +68,10 @@ namespace Test01
                             sb.Append(",");
                         }
 
-                        DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).ToArray();
+                        DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).OrderBy(p => p.Id).ToArray();
                         if (pullRequests.Length != 0)
                         {
-                            sb.Append(Tools.JoinToString(
-                                pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
+                            sb.Append(Tools.JoinToString(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
                         }
                         else
                         {
@@ -117,24 +119,105 @@ namespace Test01
         {
             using TextWriter textWriter = new StreamWriter(@"c:\temp\mixa.html");
 
-            string[] paths = Tools.GetUniquePath(workItemList).OrderBy(t => t).ToArray();
+            string[] paths = Tools.GetUniquePath(workItemList).Where(l => BranchPaths.Length == 0 || BranchPaths.Contains(l)).OrderBy(t => t).ToArray();
+
+            #region string Styles()
+
+            string Styles()
+            {
+                return @"
+<style type='text/css'>
+    .freeze-table {
+        border-spacing: 0;
+        font-family: 'Segoe UI', sans-serif, 'Helvetica Neue';
+        font-size: 14px;
+        padding: 0;
+        border: 1px solid #ccc
+    }
+
+    thead th {
+        top: 0;
+        position: sticky;
+        background-color: #666;
+        color: #fff;
+        z-index: 20;
+        min-height: 30px;
+        height: 30px;
+        text-align: left;
+    }
+
+    tr:nth-child(even)
+    {
+        background-color: #f2f2f2;
+    }
+
+    th td {
+        padding: 0;
+        top: 0;
+        outline: 1px solid #ccc;
+        border: none;;
+        outline-offset: -1px;
+        padding-left: 5px;
+    }
+
+    tr {
+        min-height: 25px;
+        height: 25px;
+    }
+
+    .col-id-number
+    {
+        left: 0;
+        position: sticky;
+    }
+
+    .col-type
+    {
+        left: 80;
+        position: sticky;
+    }
+
+    .fixed-header
+    {
+        z-index: 50;
+    }
+
+    tr:nth-child(even) td[scope=row] {
+        background-color: #f2f2f2;
+    }
+
+    tr:nth-child(odd) td[scope=row] {
+        background-color: white;
+    }
+
+</style>
+";
+            }
+
+            #endregion
 
             textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
+            //textWriter.WriteLine(Styles());
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body>");
-            textWriter.WriteLine("<table border='1'>");
+            textWriter.WriteLine("<table border='1' class='freeze-table'>");
 
             textWriter.WriteLine("<tr>");
-            textWriter.WriteLine("<td>Id</td><td>Type</td><td>State</td><td>Title</td>");
+            textWriter.WriteLine("<th class='col-id-number fixed-header'>Id</th>");
+            textWriter.WriteLine("<th class='col-type fixed-header'>Type</th>");
+            textWriter.WriteLine("<th>State</th>");
+            textWriter.WriteLine("<th>Title</th>");
 
             foreach (string path in paths)
             {
-                textWriter.WriteLine($"<td>{HttpUtility.HtmlAttributeEncode(path)}</td>");
+                textWriter.WriteLine($"<th>{HttpUtility.HtmlAttributeEncode(path)}</th>");
             }
 
             textWriter.WriteLine("</tr>");
+
+            #region void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
 
             void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
             {
@@ -146,15 +229,17 @@ namespace Test01
                     {
                         sb.Append("<td>");
 
-                        DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).ToArray();
+                        DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).OrderBy(p => p.Id).ToArray();
+
                         if (pullRequests.Length != 0)
                         {
-                            sb.Append(Tools.JoinToString(
-                                pullRequests.Select(p =>
-                                {
-                                    return $"<span title='{p.CloseDate:yyyy/MM/dd HH:mm}'>{p.Id}</span>";
-                                }), "&nbsp;"));
-                            //sb.Append(Tools.JoinToString(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
+                            IEnumerable<string> enumerable = pullRequests.Select(p =>
+                            {
+                                string date = $"{p.CloseDate:yyyy/MM/dd HH:mm}";
+                                return $"<span title='{date}'>{p.Id}</span>";
+                            });
+
+                            sb.Append(Tools.JoinToString(enumerable, "<br />"));
                         }
                         else
                         {
@@ -168,26 +253,49 @@ namespace Test01
                 }
             }
 
-            void PrintLevel(IDocumentWorkItemList levelList, int levelNumber)
-            {
-                textWriter.WriteLine("<tr>");
+            #endregion
 
+            Color[] colors = new[] {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue};
+            int colorIndex = -1;
+
+            #region void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
+
+            void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
+            {
                 foreach (DocumentWorkItem workItem in levelList.GetWorkItems())
                 {
-                    textWriter.Write($"<td><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
-                    textWriter.Write($"<td>{workItem.WorkItemType}</td>");
+                    if (levelNumber == 0)
+                    {
+                        colorIndex = (colorIndex + 1) % colors.Length;
+                        color = colors[colorIndex];
+                    }
+
+                    DocumentPullRequest[] pullRequestList = workItem.GetFullPullRequestList().ToArray();
+
+                    string style = $"background-color:{ColorTranslator.ToHtml(color)};";
+                    if (pullRequestList.Length == 0)
+                    {
+                        style += " font-weight: bold;";
+                    }
+
+                    textWriter.WriteLine($"<tr style='{style};'>");
+
+                    textWriter.Write($"<td class='col-id-number' scope='row'><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
+                    textWriter.Write($"<td class='col-type' scope='row'>{workItem.WorkItemType}</td>");
                     textWriter.Write($"<td>{workItem.State}</td>");
                     textWriter.Write($"<td>{string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 3))}{workItem.Title}</td>");
 
-                    PrintPullRequestList(workItem.GetFullPullRequestList());
+                    PrintPullRequestList(pullRequestList);
 
                     textWriter.WriteLine("</tr>");
 
-                    PrintLevel(workItem.SubItems, levelNumber + 1);
+                    PrintLevel(workItem.SubItems, levelNumber + 1, color);
                 }
             }
 
-            PrintLevel(workItemList, 0);
+            #endregion
+
+            PrintLevel(workItemList, 0, Color.White);
 
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
@@ -202,6 +310,11 @@ namespace Test01
             foreach (GitWorkItem gitWorkItem in gitWorkItemList.Value)
             {
                 Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} {gitWorkItem.Id} {gitWorkItem.Fields.Title}");
+
+                if (gitWorkItem.Fields.WorkItemType == "Task-Validation")
+                {
+                    continue;
+                }
 
                 List<int> childList = new List<int>();
                 List<int> pullRequestList = new List<int>();
