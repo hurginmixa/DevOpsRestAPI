@@ -34,5 +34,17 @@ namespace Test01.GitClasses
 
         [JsonPropertyName("repository")] 
         public GitRepository Repository { get; set; } = new GitRepository();
+
+        [JsonPropertyName("createdBy")] 
+        public GitPullRequestPeople CreatedBy { get; set; } = new GitPullRequestPeople();
+
+        [JsonPropertyName("closedBy")] 
+        public GitPullRequestPeople ClosedBy { get; set; } = new GitPullRequestPeople();
+    }
+
+    public class GitPullRequestPeople
+    {
+        [JsonPropertyName("displayName")]
+        public string DisplayName { get; set; }
     }
 }

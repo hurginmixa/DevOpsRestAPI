@@ -7,5 +7,7 @@ namespace Test01.DocumentClasses
         void AddWorkItem(DocumentWorkItem item);
 
         IEnumerable<DocumentWorkItem> GetWorkItems();
+        
+        void RemoveItem(DocumentWorkItem workItem);
     }
 }

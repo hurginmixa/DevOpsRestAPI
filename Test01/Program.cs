@@ -16,12 +16,14 @@ namespace Test01
 {
     public static class Program
     {
-        private static readonly int[] WorkItems =
+        private static readonly int[] WorkItemNumbers =
         {
-            34598, 39309, 39559, 39378, 39347, 39523, 39319,
-            39967, 39346, 38358,
-            38280, 37192, 38836, 37787, 40044, 33462,
-            32807, 40071, 38966, 38968, 39060
+            40178, 40180, 38967, 39059, 35861, 35862, 34516, 34519,
+
+            //34598, 39309, 39559, 39378, 39347, 39523, 39319,
+            //39967, 39346, 38358,
+            //38280, 37192, 38836, 37787, 40044, 33462,
+            //32807, 40071, 38966, 38968, 39060
         };
 
         private static readonly string[] BranchPaths = {/*"ver/10.0/dev", "ver/10.0/2023/01/rel", "ver/10.0/2023/03/rel"/**/};
@@ -30,13 +32,44 @@ namespace Test01
         {
             DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
-            await PerformWorkItems(WorkItems, workItemList);
+            await PerformWorkItems(WorkItemNumbers, workItemList);
+
+            RemoveDuplicateItems(workItemList);
 
             Console.WriteLine("Printing");
 
             PrintHtml(workItemList);
 
             Console.WriteLine("Complete");
+        }
+
+        private static void RemoveDuplicateItems(IDocumentWorkItemList workItemList)
+        {
+            HashSet<DocumentWorkItem> items = new HashSet<DocumentWorkItem>(workItemList.GetWorkItems());
+            HashSet<DocumentWorkItem> itemsToDelete = new HashSet<DocumentWorkItem>();
+
+            void Rr(IDocumentWorkItemList list)
+            {
+                foreach (DocumentWorkItem workItem in list.GetWorkItems())
+                {
+                    if (items.Contains(workItem))
+                    {
+                        itemsToDelete.Add(workItem);
+                    }
+
+                    Rr(workItem.SubItems);
+                }
+            }
+
+            foreach (DocumentWorkItem workItem in workItemList.GetWorkItems())
+            {
+                Rr(workItem.SubItems);
+            }
+
+            foreach (DocumentWorkItem workItem in itemsToDelete)
+            {
+                workItemList.RemoveItem(workItem);
+            }
         }
 
         private static void PrintCsv(IDocumentWorkItemList workItemList)
@@ -236,7 +269,7 @@ namespace Test01
                             IEnumerable<string> enumerable = pullRequests.Select(p =>
                             {
                                 string date = $"{p.CloseDate:yyyy/MM/dd HH:mm}";
-                                return $"<span title='{date}'>{p.Id}</span>";
+                                return $"<span title='{date}&nbsp;{p.CreateBy}'>{p.Id}</span>";
                             });
 
                             sb.Append(Tools.JoinToString(enumerable, "<br />"));
@@ -302,9 +335,9 @@ namespace Test01
             textWriter.WriteLine("</html>");
         }
 
-        private static async Task PerformWorkItems(IEnumerable<int> workItems, IDocumentWorkItemList workItemList)
+        private static async Task PerformWorkItems(IEnumerable<int> workItemNumbers, IDocumentWorkItemList workItemList)
         {
-            string jsonResponseBody = CustJsonSerializer.FormatJson(await HttpTools.GetWorkItemListByIds(workItems.OrderBy(rr => rr)));
+            string jsonResponseBody = CustJsonSerializer.FormatJson(await HttpTools.GetWorkItemListByIds(workItemNumbers.Distinct().OrderBy(rr => rr)));
             GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(jsonResponseBody);
 
             foreach (GitWorkItem gitWorkItem in gitWorkItemList.Value)

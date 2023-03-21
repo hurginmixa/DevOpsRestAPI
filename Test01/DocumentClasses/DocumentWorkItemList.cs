@@ -12,5 +12,7 @@ namespace Test01.DocumentClasses
         }
 
         public IEnumerable<DocumentWorkItem> GetWorkItems() => _list;
+
+        public void RemoveItem(DocumentWorkItem workItem) => _list.Remove(workItem);
     }
 }

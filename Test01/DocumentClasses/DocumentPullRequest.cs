@@ -9,6 +9,7 @@ namespace Test01.DocumentClasses
         private readonly string _status;
         private readonly string _targetRefName;
         private readonly DateTime _closeDate;
+        private readonly string _createBy;
 
         public DocumentPullRequest(GitPullRequest pullRequest)
         {
@@ -16,6 +17,7 @@ namespace Test01.DocumentClasses
             _status = pullRequest.Status;
             _targetRefName = pullRequest.TargetRefName.Replace("refs/heads/", "");
             _closeDate = pullRequest.ClosedDate.ToLocalTime();
+            _createBy = pullRequest.CreatedBy.DisplayName;
         }
 
         public int Id => _id;
@@ -26,9 +28,11 @@ namespace Test01.DocumentClasses
 
         public string TargetRefName => _targetRefName;
 
+        public string CreateBy => _createBy;
+
         private bool Equals(DocumentPullRequest other)
         {
-            return _id == other._id && _status == other._status && _targetRefName == other._targetRefName;
+            return _id == other._id;
         }
 
         public override bool Equals(object obj)

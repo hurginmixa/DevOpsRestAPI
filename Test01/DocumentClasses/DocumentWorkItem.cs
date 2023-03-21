@@ -31,14 +31,14 @@ namespace Test01.DocumentClasses
         {
             HashSet<DocumentPullRequest> pullRequests = new HashSet<DocumentPullRequest>();
 
-            foreach (var pullRequest in PullRequestList)
+            foreach (DocumentPullRequest pullRequest in PullRequestList)
             {
                 pullRequests.Add(pullRequest);
             }
 
             foreach (var subItem in SubItems.GetWorkItems())
             {
-                foreach (var pullRequest in subItem.GetFullPullRequestList())
+                foreach (DocumentPullRequest pullRequest in subItem.GetFullPullRequestList())
                 {
                     pullRequests.Add(pullRequest);
                 }
@@ -61,5 +61,23 @@ namespace Test01.DocumentClasses
         public string Title => _title;
 
         public string Html => _html;
+
+        private bool Equals(DocumentWorkItem other)
+        {
+            return _id == other._id;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((DocumentWorkItem) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _id;
+        }
     }
 }
