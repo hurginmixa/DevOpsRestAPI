@@ -6,9 +6,9 @@ namespace Test01
 {
     public static class Tools
     {
-        public static string JoinToString<T>(IEnumerable<T> enumerable, string delimiter)
+        public static string JoinToString<T>(this IEnumerable<T> enumerable, string delimiter)
         {
-            IEnumerator<T> enumerator = enumerable.GetEnumerator();
+            using IEnumerator<T> enumerator = enumerable.GetEnumerator();
 
             if (!enumerator.MoveNext())
             {
@@ -27,7 +27,7 @@ namespace Test01
             return builder.ToString();
         }
 
-        public static IEnumerable<string> GetUniquePath(IDocumentWorkItemList workItemList)
+        public static IEnumerable<string> GetUniquePath(this IDocumentWorkItemList workItemList)
         {
             HashSet<string> hashSet = new HashSet<string>();
 

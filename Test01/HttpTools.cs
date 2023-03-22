@@ -21,7 +21,7 @@ namespace Test01
 
         public static async Task<string> GetWorkItemListByIds(IEnumerable<int> workItems)
         {
-            var items = Tools.JoinToString(workItems, ",");
+            var items = workItems.JoinToString(",");
 
             var uri = $"https://dev.azure.com/{Organization}/{Project}/_apis/wit/workitems?ids={items}&$expand=all&api-version=7.0";
 

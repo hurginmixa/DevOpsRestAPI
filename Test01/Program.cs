@@ -18,12 +18,12 @@ namespace Test01
     {
         private static readonly int[] WorkItemNumbers =
         {
-            40178, 40180, 38967, 39059, 35861, 35862, 34516, 34519,
+            40178, 40180, 38967, 39059, 35861, 34516,
 
-            //34598, 39309, 39559, 39378, 39347, 39523, 39319,
-            //39967, 39346, 38358,
-            //38280, 37192, 38836, 37787, 40044, 33462,
-            //32807, 40071, 38966, 38968, 39060
+            34598, 39309, 39378, 39319,
+            39967, 39346, 38358,
+            38280, 37192, 38836, 37787, 40044, 33462,
+            32807, 40071, 38966
         };
 
         private static readonly string[] BranchPaths = {/*"ver/10.0/dev", "ver/10.0/2023/01/rel", "ver/10.0/2023/03/rel"/**/};
@@ -32,7 +32,7 @@ namespace Test01
         {
             DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
-            await PerformWorkItems(WorkItemNumbers, workItemList);
+            await PerformWorkItems(WorkItemNumbers, workItemList, 1);
 
             RemoveDuplicateItems(workItemList);
 
@@ -65,6 +65,10 @@ namespace Test01
             {
                 Rr(workItem.SubItems);
             }
+
+
+            string duplicateNumbers = itemsToDelete.Select(i => i.Id).JoinToString(", ");
+            Console.WriteLine(duplicateNumbers);
 
             foreach (DocumentWorkItem workItem in itemsToDelete)
             {
@@ -104,7 +108,7 @@ namespace Test01
                         DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).OrderBy(p => p.Id).ToArray();
                         if (pullRequests.Length != 0)
                         {
-                            sb.Append(Tools.JoinToString(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})"), " "));
+                            sb.Append(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})").JoinToString(" "));
                         }
                         else
                         {
@@ -272,7 +276,7 @@ namespace Test01
                                 return $"<span title='{date}&nbsp;{p.CreateBy}'>{p.Id}</span>";
                             });
 
-                            sb.Append(Tools.JoinToString(enumerable, "<br />"));
+                            sb.Append(enumerable.JoinToString("<br />"));
                         }
                         else
                         {
@@ -335,14 +339,14 @@ namespace Test01
             textWriter.WriteLine("</html>");
         }
 
-        private static async Task PerformWorkItems(IEnumerable<int> workItemNumbers, IDocumentWorkItemList workItemList)
+        private static async Task PerformWorkItems(IEnumerable<int> workItemNumbers, IDocumentWorkItemList workItemList, int levelNumber)
         {
             string jsonResponseBody = CustJsonSerializer.FormatJson(await HttpTools.GetWorkItemListByIds(workItemNumbers.Distinct().OrderBy(rr => rr)));
             GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(jsonResponseBody);
 
             foreach (GitWorkItem gitWorkItem in gitWorkItemList.Value)
             {
-                Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} {gitWorkItem.Id} {gitWorkItem.Fields.Title}");
+                Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId,2} {levelNumber,2} {gitWorkItem.Id,5} {gitWorkItem.Fields.Title}");
 
                 if (gitWorkItem.Fields.WorkItemType == "Task-Validation")
                 {
@@ -388,7 +392,7 @@ namespace Test01
 
                 if (childList.Count > 0)
                 {
-                    await PerformWorkItems(childList.ToArray(), workItem.SubItems);
+                    await PerformWorkItems(childList.ToArray(), workItem.SubItems, levelNumber + 1);
                 }
             }
         }
