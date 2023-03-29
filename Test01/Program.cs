@@ -23,7 +23,12 @@ namespace Test01
             34598, 39309, 39378, 39319,
             39967, 39346, 38358,
             38280, 37192, 38836, 37787, 40044, 33462,
-            32807, 40071, 38966
+            32807, 40071, 38966,
+
+            40144, 40549,
+
+            40044, 39309, 36757, 36514, 38280, 31765, 34112, 39244,
+
         };
 
         private static readonly string[] BranchPaths = {/*"ver/10.0/dev", "ver/10.0/2023/01/rel", "ver/10.0/2023/03/rel"/**/};
@@ -80,7 +85,7 @@ namespace Test01
         {
             using TextWriter textWriter = new StreamWriter(@"c:\temp\mixa.csv");
 
-            string[] paths = Tools.GetUniquePath(workItemList).OrderBy(t => t).ToArray();
+            string[] paths = workItemList.GetUniquePath().OrderBy(t => t).ToArray();
 
             textWriter.Write("Id,Type,State,Title");
             foreach (string path in paths)
@@ -273,7 +278,7 @@ namespace Test01
                             IEnumerable<string> enumerable = pullRequests.Select(p =>
                             {
                                 string date = $"{p.CloseDate:yyyy/MM/dd HH:mm}";
-                                return $"<span title='{date}&nbsp;{p.CreateBy}'>{p.Id}</span>";
+                                return $"<span title='&ldquo;{p.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{p.CreateBy}'>{p.Id}</span>";
                             });
 
                             sb.Append(enumerable.JoinToString("<br />"));
