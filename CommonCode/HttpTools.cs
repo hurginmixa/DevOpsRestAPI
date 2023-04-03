@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Test01
+namespace CommonCode
 {
     public static class HttpTools
     {

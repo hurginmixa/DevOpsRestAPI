@@ -2,7 +2,7 @@
 using System.IO;
 using System.Reflection;
 
-namespace Test01
+namespace CommonCode
 {
     public static class PatContainer
     {

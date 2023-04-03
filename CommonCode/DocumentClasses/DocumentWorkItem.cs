@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Test01.GitClasses;
+using CommonCode.GitClasses;
 
-namespace Test01.DocumentClasses
+namespace CommonCode.DocumentClasses
 {
     public class DocumentWorkItem
     {

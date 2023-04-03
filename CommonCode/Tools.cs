@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using Test01.DocumentClasses;
+using CommonCode.DocumentClasses;
 
-namespace Test01
+namespace CommonCode
 {
     public static class Tools
     {

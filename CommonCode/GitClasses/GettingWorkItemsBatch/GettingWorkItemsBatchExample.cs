@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Test01.GitClasses.GettingWorkItemsBatch
+namespace CommonCode.GitClasses.GettingWorkItemsBatch
 {
     public static class GettingWorkItemsBatchExample
     {

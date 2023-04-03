@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Test01.GitClasses.GettingWorkItemsBatch
+namespace CommonCode.GitClasses.GettingWorkItemsBatch
 {
     public class WorkItemErrorPolicy
     {

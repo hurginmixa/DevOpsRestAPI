@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Test01.DocumentClasses
+namespace CommonCode.DocumentClasses
 {
     public class DocumentWorkItemList : IDocumentWorkItemList
     {

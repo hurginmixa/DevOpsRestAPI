@@ -5,9 +5,9 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-namespace Test01
+namespace CommonCode
 {
-    internal static class CustJsonSerializer
+    public static class CustJsonSerializer
     {
         public static string Serialize<T>(T obj)
         {

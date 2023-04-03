@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace Test01.GitClasses
+namespace CommonCode.GitClasses
 {
     public class GitPullRequest
     {
