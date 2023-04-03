@@ -5,12 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Test01.GitClasses;
-using Microsoft.Office.Interop.Excel;
 using Test01.DocumentClasses;
+using Test01.GitClasses.GettingWorkItemsBatch;
 
 namespace Test01
 {
@@ -27,7 +28,7 @@ namespace Test01
 
             40144, 40549,
 
-            40044, 39309, 36757, 36514, 38280, 31765, 34112, 39244,
+            40044, 39309, 36757, 36514, 38280, 31765, 34112, 39244, 39926,
 
         };
 
@@ -361,7 +362,7 @@ namespace Test01
                 List<int> childList = new List<int>();
                 List<int> pullRequestList = new List<int>();
 
-                foreach (GitRelation relation in gitWorkItem.Relations)
+                foreach (GitWorkItemRelation relation in gitWorkItem.Relations)
                 {
                     if (relation.Attributes.Name == "Child" || relation.Attributes.Name == "Pull Request")
                     {

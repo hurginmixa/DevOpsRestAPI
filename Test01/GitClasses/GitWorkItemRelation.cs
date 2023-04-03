@@ -2,7 +2,7 @@
 
 namespace Test01.GitClasses
 {
-    public class GitRelation
+    public class GitWorkItemRelation
     {
         [JsonPropertyName("rel")]
         public string Rel { get; set; }

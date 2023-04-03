@@ -28,19 +28,39 @@ namespace Test01
             return await GetStringByUri(uri);
         }
 
+        public static async Task<string> GetWorkItemBatch(string json)
+        {
+            var uri = $"https://dev.azure.com/{Organization}/{Project}/_apis/wit/workitemsbatch?api-version=7.0";
+
+            return await PostStringByUri(uri, json);
+        }
+
         private static async Task<string> GetStringByUri(string uri)
         {
             var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{PatContainer.PersonalAccessToken}"));
-            using (var httpClient = new HttpClient())
-            {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
+            using var httpClient = new HttpClient();
 
-                HttpResponseMessage response = await httpClient.GetAsync(uri);
-                response.EnsureSuccessStatusCode();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
 
-                return await response.Content.ReadAsStringAsync();
-            }
+            HttpResponseMessage response = await httpClient.GetAsync(uri);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
         }
 
+        private static async Task<string> PostStringByUri(string uri, string json)
+        {
+            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{PatContainer.PersonalAccessToken}"));
+            using var httpClient = new HttpClient();
+
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
+
+            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await httpClient.PostAsync(uri, content);
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
+        }
     }
 }

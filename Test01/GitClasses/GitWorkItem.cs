@@ -8,11 +8,14 @@ namespace Test01.GitClasses
         [JsonPropertyName("id")] 
         public int Id { get; set; }
 
+        [JsonPropertyName("url")] 
+        public string Url { get; set; }
+
         [JsonPropertyName("fields")]
         public GitWorkItemFields Fields { get; set; } = new();
 
         [JsonPropertyName("relations")] 
-        public GitRelation[] Relations { get; set; } = Array.Empty<GitRelation>();
+        public GitWorkItemRelation[] Relations { get; set; } = Array.Empty<GitWorkItemRelation>();
 
         [JsonPropertyName("_links")] 
         public GitLinks Links { get; set; }
