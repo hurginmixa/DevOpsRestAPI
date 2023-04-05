@@ -39,24 +39,14 @@ namespace Test02
         {
             Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} Level2 Start");
 
-            int i = await Level3();
-            
-            Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} Level2 End");
-            return i;
-        }
-
-        private static async Task<int> Level3()
-        {
-            Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} Level3 Start");
-
             int i = await Task.Run(() =>
             {
-                Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} Level3 Task");
+                Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} Level2 Task");
                 Thread.Sleep(100);
                 return 42;
             });
             
-            Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} Level3 End");
+            Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} Level2 End");
 
             return i;
         }

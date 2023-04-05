@@ -4,11 +4,15 @@ namespace CommonCode.DocumentClasses
 {
     public class DocumentWorkItemList : IDocumentWorkItemList
     {
+        private readonly object _sync = new object();
         private readonly List<DocumentWorkItem> _list = new();
 
         public void AddWorkItem(DocumentWorkItem item)
         {
-            _list.Add(item);
+            lock (_sync)
+            {
+                _list.Add(item);
+            }
         }
 
         public IEnumerable<DocumentWorkItem> GetWorkItems() => _list;
