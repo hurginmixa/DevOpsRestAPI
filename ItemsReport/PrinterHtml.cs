@@ -11,13 +11,15 @@ namespace ItemsReport
 {
     public static class PrinterHtml
     {
-        private static readonly string[] BranchPaths = {/*"ver/10.0/dev", "ver/10.0/2023/01/rel", "ver/10.0/2023/03/rel"/**/};
-
-        public static void Print(IDocumentWorkItemList workItemList)
+        public static void Print(IDocumentWorkItemList workItemList, Config config)
         {
-            using TextWriter textWriter = new StreamWriter(@"c:\temp\mixa.html");
+            using TextWriter textWriter = new StreamWriter(config.OutputFile);
 
-            string[] paths = Tools.GetUniquePath(workItemList).Where(l => BranchPaths.Length == 0 || BranchPaths.Contains(l)).OrderBy(t => t).ToArray();
+            string[] paths = workItemList.GetUniquePath().Where(l =>
+            {
+                string[] branchPaths = config.SelectedBranchPaths;
+                return branchPaths.Length == 0 || branchPaths.Contains(l);
+            }).OrderBy(t => t).ToArray();
 
             #region string Styles()
 

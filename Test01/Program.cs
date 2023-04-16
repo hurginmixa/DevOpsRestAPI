@@ -1,4 +1,5 @@
-﻿using CommonCode.GitClasses.GettingWorkItemsBatch;
+﻿using CommonCode;
+using CommonCode.GitClasses.GettingWorkItemsBatch;
 
 namespace Test01
 {
@@ -6,7 +7,7 @@ namespace Test01
     {
         static void Main(string[] args)
         {
-            GettingWorkItemsBatchExample.GetNewMethod().Wait();
+            GettingWorkItemsBatchExample.GetNewMethod(PatContainer.PersonalAccessToken).Wait();
         }
     }
 }

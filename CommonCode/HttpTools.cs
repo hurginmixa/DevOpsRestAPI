@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace CommonCode
@@ -13,32 +12,32 @@ namespace CommonCode
         private const string Organization = "AzCamtek";
         private const string Project = "Falcon";
 
-        public static async Task<string> GetPullRequestById(int id)
+        public static async Task<string> GetPullRequestById(int id, string personalAccessToken)
         {
             var uri = $"https://dev.azure.com/{Organization}/_apis/git/pullrequests/{id}?api-version=7.1-preview.0";
 
-            return await GetStringByUri(uri);
+            return await GetStringByUri(uri, personalAccessToken);
         }
 
-        public static async Task<string> GetWorkItemListByIds(IEnumerable<int> workItems)
+        public static async Task<string> GetWorkItemListByIds(IEnumerable<int> workItems, string personalAccessToken)
         {
             var items = workItems.JoinToString(",");
 
             var uri = $"https://dev.azure.com/{Organization}/{Project}/_apis/wit/workitems?ids={items}&$expand=all&api-version=7.0";
 
-            return await GetStringByUri(uri);
+            return await GetStringByUri(uri, personalAccessToken);
         }
 
-        public static async Task<string> GetWorkItemBatch(string json)
+        public static async Task<string> GetWorkItemBatch(string json, string personalAccessToken)
         {
             var uri = $"https://dev.azure.com/{Organization}/{Project}/_apis/wit/workitemsbatch?api-version=7.0";
 
-            return await PostStringByUri(uri, json);
+            return await PostStringByUri(uri, json, personalAccessToken);
         }
 
-        private static async Task<string> GetStringByUri(string uri)
+        private static async Task<string> GetStringByUri(string uri, string personalAccessToken)
         {
-            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{PatContainer.PersonalAccessToken}"));
+            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{personalAccessToken}"));
             using var httpClient = new HttpClient();
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
@@ -49,9 +48,9 @@ namespace CommonCode
             return await response.Content.ReadAsStringAsync();
         }
 
-        private static async Task<string> PostStringByUri(string uri, string json)
+        private static async Task<string> PostStringByUri(string uri, string json, string personalAccessToken)
         {
-            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{PatContainer.PersonalAccessToken}"));
+            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{personalAccessToken}"));
             using var httpClient = new HttpClient();
 
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);

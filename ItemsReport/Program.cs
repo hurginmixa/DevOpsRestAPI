@@ -19,35 +19,22 @@ namespace Test01
 {
     public static class Program
     {
-        private static readonly int[] WorkItemNumbers =
-        {
-            40178, 40180, 38967, 39059, 35861, 34516,
-
-            34598, 39309, 39378, 39319,
-            39967, 39346, 38358,
-            38280, 37192, 38836, 37787, 40044, 33462,
-            32807, 40071, 38966,
-
-            40144, 40549,
-
-            40044, 39309, 36757, 36514, 38280, 31765, 34112, 39244, 39926, 37442, 31358, 39031
-
-        };
-
         static async Task Main()
         {
+            Config config = Config.GetConfig();
+
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
             DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
-            await PerformWorkItems(WorkItemNumbers, workItemList, 1);
+            await PerformWorkItems(config.Ids, workItemList, 1, config);
 
             RemoveDuplicateItems(workItemList);
 
             WriteLine($"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
 
-            PrinterHtml.Print(workItemList);
+            PrinterHtml.Print(workItemList, config);
 
             WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
 
@@ -87,12 +74,12 @@ namespace Test01
             }
         }
 
-        private static async Task PerformWorkItems(IEnumerable<int> workItemNumbers, IDocumentWorkItemList workItemList, int levelNumber)
+        private static async Task PerformWorkItems(IEnumerable<int> workItemNumbers, IDocumentWorkItemList workItemList, int levelNumber, Config config)
         {
-            string jsonResponseBody = CustJsonSerializer.FormatJson(await HttpTools.GetWorkItemListByIds(workItemNumbers.Distinct().OrderBy(rr => rr)));
+            string jsonResponseBody = CustJsonSerializer.FormatJson(await HttpTools.GetWorkItemListByIds(workItemNumbers.Distinct().OrderBy(rr => rr), config.Token));
             GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(jsonResponseBody);
 
-            Task[] tasks = gitWorkItemList.Value.Select(gitWorkItem => PerformWorkItem(gitWorkItem, workItemList, levelNumber)).ToArray();
+            Task[] tasks = gitWorkItemList.Value.Select(gitWorkItem => PerformWorkItem(gitWorkItem, workItemList, levelNumber, config)).ToArray();
 
             foreach (Task task in tasks)
             {
@@ -100,7 +87,7 @@ namespace Test01
             }
         }
 
-        private static async Task PerformWorkItem(GitWorkItem gitWorkItem, IDocumentWorkItemList workItemList, int levelNumber)
+        private static async Task PerformWorkItem(GitWorkItem gitWorkItem, IDocumentWorkItemList workItemList, int levelNumber, Config config)
         {
             WriteLine($"{Thread.CurrentThread.ManagedThreadId,2} {levelNumber,2} {gitWorkItem.Id,5} {gitWorkItem.Fields.Title}");
 
@@ -138,7 +125,7 @@ namespace Test01
             if (pullRequestList.Count > 0)
             {
                 Task<string>[] tasks = pullRequestList.OrderBy(rr => rr)
-                    .Select(pullRequestId => HttpTools.GetPullRequestById(pullRequestId))
+                    .Select(pullRequestId => HttpTools.GetPullRequestById(pullRequestId, config.Token))
                     .ToArray();
 
                 foreach (Task<string> task in tasks)
@@ -152,7 +139,7 @@ namespace Test01
 
             if (childList.Count > 0)
             {
-                await PerformWorkItems(childList.ToArray(), workItem.SubItems, levelNumber + 1);
+                await PerformWorkItems(childList.ToArray(), workItem.SubItems, levelNumber + 1, config);
             }
         }
     }

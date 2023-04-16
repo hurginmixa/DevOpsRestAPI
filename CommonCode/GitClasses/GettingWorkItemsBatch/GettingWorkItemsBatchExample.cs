@@ -7,7 +7,7 @@ namespace CommonCode.GitClasses.GettingWorkItemsBatch
 {
     public static class GettingWorkItemsBatchExample
     {
-        public static async Task GetNewMethod()
+        public static async Task GetNewMethod(string personalAccessToken)
         {
             GitWorkItemsBatchRequestBody batchRequestBody = new GitWorkItemsBatchRequestBody
             {
@@ -23,7 +23,7 @@ namespace CommonCode.GitClasses.GettingWorkItemsBatch
 
             string json = CustJsonSerializer.FormatJson(JsonSerializer.Serialize(batchRequestBody, options));
 
-            string result = CustJsonSerializer.FormatJson(await HttpTools.GetWorkItemBatch(json));
+            string result = CustJsonSerializer.FormatJson(await HttpTools.GetWorkItemBatch(json, personalAccessToken));
             GitWorkItemList gitWorkItemList = JsonSerializer.Deserialize<GitWorkItemList>(result);
 
             Console.WriteLine($"gitWorkItemList.Count: {gitWorkItemList?.Count ?? -1}");
