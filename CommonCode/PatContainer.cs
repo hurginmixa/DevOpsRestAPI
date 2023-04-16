@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
-using System.Reflection;
+﻿using System.IO;
 
 namespace CommonCode
 {
@@ -10,18 +8,9 @@ namespace CommonCode
 
         static PatContainer()
         {
-            PersonalAccessToken = GetPat();
-        }
+            PPath directory = PPath.GetExeDirectory();
 
-        private static string GetPat()
-        {
-            Assembly assembly = Assembly.GetEntryAssembly();
-            Debug.Assert(assembly != null);
-
-            string directoryName = Path.GetDirectoryName(assembly.Location);
-            Debug.Assert(directoryName != null);
-
-            return File.ReadAllText(Path.Combine(directoryName, "PAT.txt"));
+            PersonalAccessToken = File.ReadAllText(directory / "PAT.txt");
         }
     }
 }

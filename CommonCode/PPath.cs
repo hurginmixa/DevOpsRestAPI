@@ -1,16 +1,17 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace CommonCode
 {
     public class PPath
     {
-        private readonly string myPath;
+        private readonly string _path;
 
         [DebuggerStepThrough]
         private PPath(string path)
         {
-            myPath = path;
+            _path = path;
         }
 
         [DebuggerStepThrough]
@@ -22,7 +23,7 @@ namespace CommonCode
         [DebuggerStepThrough]
         public static implicit operator string (PPath path)
         {
-            return path.myPath;
+            return path._path;
         }
 
         [DebuggerStepThrough]
@@ -31,16 +32,27 @@ namespace CommonCode
             return string.IsNullOrEmpty(p2) ? p1 : (PPath)Path.Combine(p1, p2);
         }
 
+        public static PPath GetExeDirectory()
+        {
+            Assembly assembly = Assembly.GetEntryAssembly();
+            Debug.Assert(assembly != null);
+
+            string directoryName = Path.GetDirectoryName(assembly.Location);
+            Debug.Assert(directoryName != null);
+
+            return ((PPath)directoryName).FullPath;
+        }
+
         public PPath FullPath
         {
             [DebuggerStepThrough]
-            get { return Path.GetFullPath(myPath); }
+            get { return Path.GetFullPath(_path); }
         }
 
         [DebuggerStepThrough]
         public bool Equals(PPath other)
         {
-            return myPath.Equals(other.myPath);
+            return _path.Equals(other._path);
         }
 
         public static PPath AddSlash(PPath src)

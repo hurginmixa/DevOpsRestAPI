@@ -13,7 +13,7 @@ namespace ItemsReport
     {
         public static void Print(IDocumentWorkItemList workItemList, Config config)
         {
-            using TextWriter textWriter = new StreamWriter(config.OutputFile);
+            using TextWriter textWriter = new StreamWriter(PPath.GetExeDirectory() / config.OutputFile);
 
             string[] paths = workItemList.GetUniquePath().Where(l =>
             {
