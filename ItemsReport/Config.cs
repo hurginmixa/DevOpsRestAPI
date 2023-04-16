@@ -3,12 +3,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
+using CommonCode;
 
 namespace ItemsReport
 {
     public class Config
     {
-        public string Token { get; set; }
+        public string Token => PatContainer.PersonalAccessToken;
 
         public int[] Ids { get; set; } = Array.Empty<int>();
 
