@@ -91,17 +91,12 @@ namespace Test01
         {
             WriteLine($"{Thread.CurrentThread.ManagedThreadId,2} {levelNumber,2} {gitWorkItem.Id,5} {gitWorkItem.Fields.Title}");
 
-            if (gitWorkItem.Fields.WorkItemType == "Task-Validation")
-            {
-                return;
-            }
-
             List<int> childList = new List<int>();
             List<int> pullRequestList = new List<int>();
 
             foreach (GitWorkItemRelation relation in gitWorkItem.Relations)
             {
-                if (relation.Attributes.Name is "Child" or "Pull Request")
+                if (relation.Attributes.Name is "Child" or "Pull Request" or "Fixed in Commit")
                 {
                     string decodedUrl = Uri.UnescapeDataString(relation.Url);
                     string txtId = decodedUrl.Substring(decodedUrl.LastIndexOf('/') + 1);
@@ -119,18 +114,23 @@ namespace Test01
                 }
             }
 
+            if (gitWorkItem.Fields.WorkItemType == "Task-Validation" && childList.Count == 0 && pullRequestList.Count == 0)
+            {
+                return;
+            }
+
             DocumentWorkItem workItem = new DocumentWorkItem(gitWorkItem);
             workItemList.AddWorkItem(workItem);
 
             if (pullRequestList.Count > 0)
             {
-                Task<string>[] tasks = pullRequestList.OrderBy(rr => rr)
+                Task<string>[] pullRequestTasks = pullRequestList.OrderBy(rr => rr)
                     .Select(pullRequestId => HttpTools.GetPullRequestById(pullRequestId, config.Token))
                     .ToArray();
 
-                foreach (Task<string> task in tasks)
+                foreach (Task<string> pullRequestTask in pullRequestTasks)
                 {
-                    string result = CustJsonSerializer.FormatJson(task.Result);
+                    string result = CustJsonSerializer.FormatJson(pullRequestTask.Result);
                     GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(result);
 
                     workItem.AddPullRequest(new DocumentPullRequest(pullRequest));

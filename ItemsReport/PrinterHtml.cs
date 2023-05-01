@@ -133,10 +133,23 @@ namespace ItemsReport
 
                         if (pullRequests.Length != 0)
                         {
-                            IEnumerable<string> enumerable = pullRequests.Select(p =>
+                            IEnumerable<string> enumerable = pullRequests.Select(pullRequest =>
                             {
-                                string date = $"{p.CloseDate:yyyy/MM/dd HH:mm}";
-                                return $"<span title='&ldquo;{p.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{p.CreateBy}'>{p.Id}</span>";
+                                string date = $"{pullRequest.CloseDate:yyyy/MM/dd HH:mm}";
+                                string resultString = $"<span title='&ldquo;{pullRequest.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{pullRequest.CreateBy}&nbsp;{pullRequest.Status}'>{pullRequest.Id}</span>";
+
+                                if (pullRequest.Status == "active")
+                                {
+                                    resultString = $"<B>{resultString}</B>";
+                                }
+                                else if (pullRequest.Status == "abandoned")
+                                {
+                                    resultString = $"<S>{resultString}</S>";
+                                }
+
+                                resultString = $"<a href='https://dev.azure.com/AzCamtek/GIT/_git/CamtekGit/pullrequest/{pullRequest.Id}' target='_blank'>{resultString}</a>"; // 😪😪😪
+
+                                return resultString;
                             });
 
                             sb.Append(enumerable.JoinToString("<br />"));

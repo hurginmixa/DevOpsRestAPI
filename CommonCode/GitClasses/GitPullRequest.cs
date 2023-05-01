@@ -40,11 +40,29 @@ namespace CommonCode.GitClasses
 
         [JsonPropertyName("closedBy")] 
         public GitPullRequestPeople ClosedBy { get; set; } = new GitPullRequestPeople();
+
+        [JsonPropertyName("lastMergeSourceCommit")]
+        public GitPullRequestCommitInfo LastMergeSourceCommit { get; set; } = new GitPullRequestCommitInfo();
+
+        [JsonPropertyName("lastMergeTargetCommit")]
+        public GitPullRequestCommitInfo LastMergeTargetCommit { get; set; } = new GitPullRequestCommitInfo();
+
+        [JsonPropertyName("lastMergeCommit")]
+        public GitPullRequestCommitInfo LastMergeCommit { get; set; } = new GitPullRequestCommitInfo();
     }
 
     public class GitPullRequestPeople
     {
         [JsonPropertyName("displayName")]
         public string DisplayName { get; set; }
+    }
+
+    public class GitPullRequestCommitInfo
+    {
+        [JsonPropertyName("commitId")]
+        public string CommitId { get; set; }
+
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
     }
 }
