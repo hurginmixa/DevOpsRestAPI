@@ -15,93 +15,16 @@ namespace ItemsReport
         {
             using TextWriter textWriter = new StreamWriter(PPath.GetExeDirectory() / config.OutputFile);
 
-            string[] paths = workItemList.GetUniquePath().Where(l =>
-            {
-                string[] branchPaths = config.SelectedBranchPaths;
-                return branchPaths.Length == 0 || branchPaths.Contains(l);
-            }).OrderBy(t => t).ToArray();
+            string[] branchPaths = config.SelectedBranchPaths;
 
-            #region string Styles()
+            bool reportAllItems = branchPaths.Length == 0;
 
-            string Styles()
-            {
-                return string.Empty;
-
-                /*return @"
-<style type='text/css'>
-    .freeze-table {
-        border-spacing: 0;
-        font-family: 'Segoe UI', sans-serif, 'Helvetica Neue';
-        font-size: 14px;
-        padding: 0;
-        border: 1px solid #ccc
-    }
-
-    thead th {
-        top: 0;
-        position: sticky;
-        background-color: #666;
-        color: #fff;
-        z-index: 20;
-        min-height: 30px;
-        height: 30px;
-        text-align: left;
-    }
-
-    tr:nth-child(even)
-    {
-        background-color: #f2f2f2;
-    }
-
-    th td {
-        padding: 0;
-        top: 0;
-        outline: 1px solid #ccc;
-        border: none;;
-        outline-offset: -1px;
-        padding-left: 5px;
-    }
-
-    tr {
-        min-height: 25px;
-        height: 25px;
-    }
-
-    .col-id-number
-    {
-        left: 0;
-        position: sticky;
-    }
-
-    .col-type
-    {
-        left: 80;
-        position: sticky;
-    }
-
-    .fixed-header
-    {
-        z-index: 50;
-    }
-
-    tr:nth-child(even) td[scope=row] {
-        background-color: #f2f2f2;
-    }
-
-    tr:nth-child(odd) td[scope=row] {
-        background-color: white;
-    }
-
-</style>
-";*/
-            }
-
-            #endregion
+            string[] paths = workItemList.GetUniqueCommittedPaths().Where(path => reportAllItems || branchPaths.Contains(path)).OrderBy(t => t).ToArray();
 
             textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
-            textWriter.WriteLine(Styles());
+            textWriter.WriteLine(GetStyles());
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body>");
             textWriter.WriteLine("<table border='1' class='freeze-table'>");
@@ -179,13 +102,25 @@ namespace ItemsReport
             {
                 foreach (IDocumentWorkItem workItem in levelList.GetWorkItems())
                 {
+                    DocumentPullRequest[] pullRequestList = workItem.GetFullPullRequestList().Where(re => paths.Contains(re.TargetRefName)).ToArray();
+
                     if (levelNumber == 0)
                     {
+                        if (pullRequestList.Length == 0 && !reportAllItems)
+                        {
+                            continue;
+                        }
+
                         colorIndex = (colorIndex + 1) % colors.Length;
                         color = colors[colorIndex];
                     }
-
-                    DocumentPullRequest[] pullRequestList = workItem.GetFullPullRequestList().ToArray();
+                    else
+                    {
+                        if (pullRequestList.Length == 0 && !reportAllItems)
+                        {
+                            continue;
+                        }
+                    }
 
                     string style = $"background-color:{ColorTranslator.ToHtml(color)};";
                     if (pullRequestList.Length == 0 && !workItem.IsClosed)
@@ -205,7 +140,7 @@ namespace ItemsReport
                         workItemTitle = $"<S>{workItemTitle}</S>";
                     }
 
-                    textWriter.Write($"<td>{string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 3))}{workItemTitle}</td>");
+                    textWriter.Write($"<td>{string.Concat(Enumerable.Repeat("*&nbsp;", levelNumber))}{workItemTitle}</td>");
 
                     PrintPullRequestList(pullRequestList);
 
@@ -217,21 +152,101 @@ namespace ItemsReport
 
             #endregion
 
-            textWriter.WriteLine("<tr>");
-            textWriter.WriteLine($"<td colspan='{paths.Length + 4}'><h1>Not completed items</h1></td>");
-            textWriter.WriteLine("</tr>");
+            if (reportAllItems)
+            {
+                textWriter.WriteLine("<tr>");
+                textWriter.WriteLine($"<td colspan='{paths.Length + 4}'><h1>Not completed items</h1></td>");
+                textWriter.WriteLine("</tr>");
 
-            PrintLevel(new DocumentWorkItemList(workItemList.GetWorkItems().Where(r => r.HasActiveSubItems)), 0, Color.White);
+                PrintLevel(new DocumentWorkItemList(workItemList.GetWorkItems().Where(r => r.HasActiveSubItems)), 0, Color.White);
 
-            textWriter.WriteLine("<tr>");
-            textWriter.WriteLine($"<td colspan='{paths.Length + 4}'><h1>Completed items</h1></td>");
-            textWriter.WriteLine("</tr>");
+                textWriter.WriteLine("<tr>");
+                textWriter.WriteLine($"<td colspan='{paths.Length + 4}'><h1>Completed items</h1></td>");
+                textWriter.WriteLine("</tr>");
 
-            PrintLevel(new DocumentWorkItemList(workItemList.GetWorkItems().Where(r => !r.HasActiveSubItems)), 0, Color.White);
+                PrintLevel(new DocumentWorkItemList(workItemList.GetWorkItems().Where(r => !r.HasActiveSubItems)), 0, Color.White);
+            }
+            else
+            {
+                PrintLevel(workItemList, 0, Color.White);
+            }
 
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+        }
+
+        private static string GetStyles()
+        {
+            return string.Empty;
+
+            /*return @"
+<style type='text/css'>
+    .freeze-table {
+        border-spacing: 0;
+        font-family: 'Segoe UI', sans-serif, 'Helvetica Neue';
+        font-size: 14px;
+        padding: 0;
+        border: 1px solid #ccc
+    }
+
+    thead th {
+        top: 0;
+        position: sticky;
+        background-color: #666;
+        color: #fff;
+        z-index: 20;
+        min-height: 30px;
+        height: 30px;
+        text-align: left;
+    }
+
+    tr:nth-child(even)
+    {
+        background-color: #f2f2f2;
+    }
+
+    th td {
+        padding: 0;
+        top: 0;
+        outline: 1px solid #ccc;
+        border: none;;
+        outline-offset: -1px;
+        padding-left: 5px;
+    }
+
+    tr {
+        min-height: 25px;
+        height: 25px;
+    }
+
+    .col-id-number
+    {
+        left: 0;
+        position: sticky;
+    }
+
+    .col-type
+    {
+        left: 80;
+        position: sticky;
+    }
+
+    .fixed-header
+    {
+        z-index: 50;
+    }
+
+    tr:nth-child(even) td[scope=row] {
+        background-color: #f2f2f2;
+    }
+
+    tr:nth-child(odd) td[scope=row] {
+        background-color: white;
+    }
+
+</style>
+";*/
         }
     }
 }

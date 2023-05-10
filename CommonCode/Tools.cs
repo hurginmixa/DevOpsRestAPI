@@ -27,7 +27,7 @@ namespace CommonCode
             return builder.ToString();
         }
 
-        public static IEnumerable<string> GetUniquePath(this IDocumentWorkItemList workItemList)
+        public static IEnumerable<string> GetUniqueCommittedPaths(this IDocumentWorkItemList workItemList)
         {
             HashSet<string> hashSet = new HashSet<string>();
 

@@ -13,7 +13,7 @@ namespace ItemsReport
         {
             using TextWriter textWriter = new StreamWriter(@"c:\temp\mixa.csv");
 
-            string[] paths = workItemList.GetUniquePath().OrderBy(t => t).ToArray();
+            string[] paths = workItemList.GetUniqueCommittedPaths().OrderBy(t => t).ToArray();
 
             textWriter.Write("Id,Type,State,Title");
             foreach (string path in paths)
