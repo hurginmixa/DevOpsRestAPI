@@ -5,9 +5,18 @@ namespace CommonCode.DocumentClasses
     public class DocumentWorkItemList : IDocumentWorkItemList
     {
         private readonly object _sync = new object();
-        private readonly List<DocumentWorkItem> _list = new();
+        private readonly List<IDocumentWorkItem> _list = new();
 
-        public void AddWorkItem(DocumentWorkItem item)
+        public DocumentWorkItemList()
+        {
+        }
+
+        public DocumentWorkItemList(IEnumerable<IDocumentWorkItem> list) : this()
+        {
+            _list.AddRange(list);
+        }
+
+        public void AddWorkItem(IDocumentWorkItem item)
         {
             lock (_sync)
             {
@@ -15,8 +24,8 @@ namespace CommonCode.DocumentClasses
             }
         }
 
-        public IEnumerable<DocumentWorkItem> GetWorkItems() => _list;
+        public IEnumerable<IDocumentWorkItem> GetWorkItems() => _list;
 
-        public void RemoveItem(DocumentWorkItem workItem) => _list.Remove(workItem);
+        public void RemoveItem(IDocumentWorkItem workItem) => _list.Remove(workItem);
     }
 }

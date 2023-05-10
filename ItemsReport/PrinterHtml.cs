@@ -25,7 +25,9 @@ namespace ItemsReport
 
             string Styles()
             {
-                return @"
+                return string.Empty;
+
+                /*return @"
 <style type='text/css'>
     .freeze-table {
         border-spacing: 0;
@@ -91,7 +93,7 @@ namespace ItemsReport
     }
 
 </style>
-";
+";*/
             }
 
             #endregion
@@ -99,7 +101,7 @@ namespace ItemsReport
             textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
-            //textWriter.WriteLine(Styles());
+            textWriter.WriteLine(Styles());
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body>");
             textWriter.WriteLine("<table border='1' class='freeze-table'>");
@@ -168,14 +170,14 @@ namespace ItemsReport
 
             #endregion
 
-            Color[] colors = new[] {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue};
+            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk};
             int colorIndex = -1;
 
             #region void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
 
             void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
             {
-                foreach (DocumentWorkItem workItem in levelList.GetWorkItems())
+                foreach (IDocumentWorkItem workItem in levelList.GetWorkItems())
                 {
                     if (levelNumber == 0)
                     {
@@ -186,7 +188,7 @@ namespace ItemsReport
                     DocumentPullRequest[] pullRequestList = workItem.GetFullPullRequestList().ToArray();
 
                     string style = $"background-color:{ColorTranslator.ToHtml(color)};";
-                    if (pullRequestList.Length == 0)
+                    if (pullRequestList.Length == 0 && !workItem.IsClosed)
                     {
                         style += " font-weight: bold;";
                     }
@@ -196,7 +198,14 @@ namespace ItemsReport
                     textWriter.Write($"<td class='col-id-number' scope='row'><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
                     textWriter.Write($"<td class='col-type' scope='row'>{workItem.WorkItemType}</td>");
                     textWriter.Write($"<td>{workItem.State}</td>");
-                    textWriter.Write($"<td>{string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 3))}{workItem.Title}</td>");
+
+                    string workItemTitle = workItem.Title;
+                    if (workItem.IsClosed && pullRequestList.Length == 0)
+                    {
+                        workItemTitle = $"<S>{workItemTitle}</S>";
+                    }
+
+                    textWriter.Write($"<td>{string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 3))}{workItemTitle}</td>");
 
                     PrintPullRequestList(pullRequestList);
 
@@ -208,7 +217,17 @@ namespace ItemsReport
 
             #endregion
 
-            PrintLevel(workItemList, 0, Color.White);
+            textWriter.WriteLine("<tr>");
+            textWriter.WriteLine($"<td colspan='{paths.Length + 4}'><h1>Not completed items</h1></td>");
+            textWriter.WriteLine("</tr>");
+
+            PrintLevel(new DocumentWorkItemList(workItemList.GetWorkItems().Where(r => r.HasActiveSubItems)), 0, Color.White);
+
+            textWriter.WriteLine("<tr>");
+            textWriter.WriteLine($"<td colspan='{paths.Length + 4}'><h1>Completed items</h1></td>");
+            textWriter.WriteLine("</tr>");
+
+            PrintLevel(new DocumentWorkItemList(workItemList.GetWorkItems().Where(r => !r.HasActiveSubItems)), 0, Color.White);
 
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");

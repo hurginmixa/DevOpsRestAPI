@@ -4,10 +4,10 @@ namespace CommonCode.DocumentClasses
 {
     public interface IDocumentWorkItemList
     {
-        void AddWorkItem(DocumentWorkItem item);
+        void AddWorkItem(IDocumentWorkItem item);
 
-        IEnumerable<DocumentWorkItem> GetWorkItems();
+        IEnumerable<IDocumentWorkItem> GetWorkItems();
         
-        void RemoveItem(DocumentWorkItem workItem);
+        void RemoveItem(IDocumentWorkItem workItem);
     }
 }

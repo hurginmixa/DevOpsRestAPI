@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CommonCode.GitClasses;
 
 namespace CommonCode.DocumentClasses
 {
-    public class DocumentWorkItem
+    public class DocumentWorkItem : IDocumentWorkItem
     {
         private readonly int _id;
         private readonly string _workItemType;
@@ -47,6 +48,19 @@ namespace CommonCode.DocumentClasses
             return pullRequests;
         }
 
+        public bool HasActiveSubItems
+        {
+            get
+            {
+                if (IsActive || IsInProgress || IsInvestigation || IsProposed || IsInProgress)
+                {
+                    return true;
+                }
+
+                return _workItemList.GetWorkItems().Any(r => r.HasActiveSubItems);
+            }
+        }
+
         public void AddPullRequest(DocumentPullRequest pullRequest)
         {
             _pullRequestList.Add(pullRequest);
@@ -59,6 +73,18 @@ namespace CommonCode.DocumentClasses
         public string State => _state;
 
         public string Title => _title;
+        
+        public bool IsClosed => _state == "Closed";
+
+        public bool IsInProgress => _state == "In Progress";
+        
+        public bool IsActive => _state == "Active";
+        
+        public bool IsProposed => _state == "Proposed";
+        
+        public bool IsInvestigation => _state == "Investigation";
+
+        public bool IsTaskValidation => _state == "Task-Validation";
 
         public string Html => _html;
 

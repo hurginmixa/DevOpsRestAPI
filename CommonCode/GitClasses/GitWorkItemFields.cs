@@ -21,5 +21,7 @@ namespace CommonCode.GitClasses
         
         [JsonPropertyName("System.CreatedBy")]
         public GitPerson CreatedBy { get; set; }
+
+        public bool IsTaskValidation => WorkItemType == "Task-Validation";
     }
 }

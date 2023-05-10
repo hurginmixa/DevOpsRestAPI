@@ -43,12 +43,12 @@ namespace Test01
 
         private static void RemoveDuplicateItems(IDocumentWorkItemList workItemList)
         {
-            HashSet<DocumentWorkItem> items = new HashSet<DocumentWorkItem>(workItemList.GetWorkItems());
-            HashSet<DocumentWorkItem> itemsToDelete = new HashSet<DocumentWorkItem>();
+            HashSet<IDocumentWorkItem> items = new HashSet<IDocumentWorkItem>(workItemList.GetWorkItems());
+            HashSet<IDocumentWorkItem> itemsToDelete = new HashSet<IDocumentWorkItem>();
 
             void Rr(IDocumentWorkItemList list)
             {
-                foreach (DocumentWorkItem workItem in list.GetWorkItems())
+                foreach (IDocumentWorkItem workItem in list.GetWorkItems())
                 {
                     if (items.Contains(workItem))
                     {
@@ -114,7 +114,7 @@ namespace Test01
                 }
             }
 
-            if (gitWorkItem.Fields.WorkItemType == "Task-Validation" && childList.Count == 0 && pullRequestList.Count == 0)
+            if (gitWorkItem.Fields.IsTaskValidation && childList.Count == 0 && pullRequestList.Count == 0)
             {
                 return;
             }
