@@ -8,7 +8,7 @@ namespace CommonCode.DocumentClasses
 
         IDocumentWorkItemList SubItems { get; }
         
-        IEnumerable<DocumentPullRequest> GetFullPullRequestList();
+        IEnumerable<(DocumentPullRequest Request, bool IsOwner)> GetFullPullRequestList();
 
         bool HasActiveSubItems { get; }
         

@@ -28,20 +28,20 @@ namespace CommonCode.DocumentClasses
 
         public IEnumerable<DocumentPullRequest> PullRequestList => _pullRequestList;
 
-        public IEnumerable<DocumentPullRequest> GetFullPullRequestList()
+        public IEnumerable<(DocumentPullRequest Request, bool IsOwner)> GetFullPullRequestList()
         {
-            HashSet<DocumentPullRequest> pullRequests = new HashSet<DocumentPullRequest>();
+            HashSet<(DocumentPullRequest Request, bool IsOwner)> pullRequests = new();
 
             foreach (DocumentPullRequest pullRequest in PullRequestList)
             {
-                pullRequests.Add(pullRequest);
+                pullRequests.Add((Request: pullRequest, IsOwner: true));
             }
 
             foreach (var subItem in SubItems.GetWorkItems())
             {
-                foreach (DocumentPullRequest pullRequest in subItem.GetFullPullRequestList())
+                foreach ((DocumentPullRequest Request, bool IsOwner) pullRequest in subItem.GetFullPullRequestList())
                 {
-                    pullRequests.Add(pullRequest);
+                    pullRequests.Add((Request: pullRequest.Request, IsOwner: false));
                 }
             }
 

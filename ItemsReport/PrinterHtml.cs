@@ -44,51 +44,61 @@ namespace ItemsReport
 
             #region void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
 
-            void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
+            void PrintPullRequestList(IEnumerable<(DocumentPullRequest Request, bool IsOwner)> pullRequestList)
             {
-                if (paths.Length > 0)
+                if (paths.Length <= 0)
                 {
-                    StringBuilder sb = new StringBuilder();
+                    return;
+                }
 
-                    foreach (string path in paths)
+                StringBuilder sb = new StringBuilder();
+
+                foreach (string path in paths)
+                {
+                    sb.Append("<td>");
+
+                    (DocumentPullRequest request, bool owner)[] pullRequests = pullRequestList.Where(pp => pp.Request.TargetRefName == path).OrderBy(p => p.Request.Id).ToArray();
+
+                    if (pullRequests.Length > 0)
                     {
-                        sb.Append("<td>");
-
-                        DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).OrderBy(p => p.Id).ToArray();
-
-                        if (pullRequests.Length != 0)
+                        IEnumerable<string> enumerable = pullRequests.Select(pullRequest =>
                         {
-                            IEnumerable<string> enumerable = pullRequests.Select(pullRequest =>
+                            string date = $"{pullRequest.request.CloseDate:yyyy/MM/dd HH:mm}";
+                                
+                            string title = $"&ldquo;{pullRequest.request.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{pullRequest.request.CreateBy}&nbsp;{pullRequest.request.Status}";
+
+                            string linkText = $"<span title='{title}'>{pullRequest.request.Id}</span>";
+
+                            if (pullRequest.request.Status == "active")
                             {
-                                string date = $"{pullRequest.CloseDate:yyyy/MM/dd HH:mm}";
-                                string resultString = $"<span title='&ldquo;{pullRequest.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{pullRequest.CreateBy}&nbsp;{pullRequest.Status}'>{pullRequest.Id}</span>";
+                                linkText = $"<B>{linkText}</B>";
+                            }
+                            else if (pullRequest.request.Status == "abandoned")
+                            {
+                                linkText = $"<S>{linkText}</S>";
+                            }
 
-                                if (pullRequest.Status == "active")
-                                {
-                                    resultString = $"<B>{resultString}</B>";
-                                }
-                                else if (pullRequest.Status == "abandoned")
-                                {
-                                    resultString = $"<S>{resultString}</S>";
-                                }
+                            linkText = $"<a href='https://dev.azure.com/AzCamtek/GIT/_git/CamtekGit/pullrequest/{pullRequest.request.Id}' target='_blank'>{linkText}</a>"; // 😪😪😪
 
-                                resultString = $"<a href='https://dev.azure.com/AzCamtek/GIT/_git/CamtekGit/pullrequest/{pullRequest.Id}' target='_blank'>{resultString}</a>"; // 😪😪😪
+                            if (pullRequest.owner)
+                            {
+                                linkText += "*";
+                            }
 
-                                return resultString;
-                            });
+                            return linkText;
+                        });
 
-                            sb.Append(enumerable.JoinToString("<br />"));
-                        }
-                        else
-                        {
-                            sb.Append("&nbsp;");
-                        }
-
-                        sb.Append("</td>");
+                        sb.Append(enumerable.JoinToString("<br />"));
+                    }
+                    else
+                    {
+                        sb.Append("&nbsp;");
                     }
 
-                    textWriter.Write(sb);
+                    sb.Append("</td>");
                 }
+
+                textWriter.Write(sb);
             }
 
             #endregion
@@ -102,7 +112,7 @@ namespace ItemsReport
             {
                 foreach (IDocumentWorkItem workItem in levelList.GetWorkItems())
                 {
-                    DocumentPullRequest[] pullRequestList = workItem.GetFullPullRequestList().Where(re => paths.Contains(re.TargetRefName)).ToArray();
+                    (DocumentPullRequest Request, bool IsOwner)[] pullRequestList = workItem.GetFullPullRequestList().Where(re => paths.Contains(re.Request.TargetRefName)).ToArray();
 
                     if (levelNumber == 0)
                     {

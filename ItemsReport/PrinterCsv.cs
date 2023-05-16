@@ -25,7 +25,7 @@ namespace ItemsReport
 
             #region void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
 
-            void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
+            void PrintPullRequestList((DocumentPullRequest Request, bool IsOwner)[] pullRequestList)
             {
                 if (paths.Length > 0)
                 {
@@ -38,15 +38,10 @@ namespace ItemsReport
                             sb.Append(",");
                         }
 
-                        DocumentPullRequest[] pullRequests = pullRequestList.Where(pp => pp.TargetRefName == path).OrderBy(p => p.Id).ToArray();
-                        if (pullRequests.Length != 0)
-                        {
-                            sb.Append(pullRequests.Select(p => $"{p.Id}({p.CloseDate:yyyy/MM/dd HH:mm})").JoinToString(" "));
-                        }
-                        else
-                        {
-                            sb.Append("\"\"");
-                        }
+                        (DocumentPullRequest request, bool owner)[] pullRequests = pullRequestList.Where(pp => pp.Request.TargetRefName == path).OrderBy(p => p.Request.Id).ToArray();
+                        sb.Append(pullRequests.Length != 0
+                            ? pullRequests.Select(p => $"{p.request.Id}({p.request.CloseDate:yyyy/MM/dd HH:mm})").JoinToString(" ")
+                            : "\"\"");
                     }
 
                     if (sb.Length > 0)
@@ -62,14 +57,14 @@ namespace ItemsReport
 
             void PrintLevel(IDocumentWorkItemList levelList, int levelNumber)
             {
-                foreach (DocumentWorkItem workItem in levelList.GetWorkItems())
+                foreach (IDocumentWorkItem workItem in levelList.GetWorkItems())
                 {
                     textWriter.Write($"{workItem.Id},");
                     textWriter.Write($"{workItem.WorkItemType},");
                     textWriter.Write($"{workItem.State},");
                     textWriter.Write($"\"{new string(' ', levelNumber * 4)}{workItem.Title}\"");
 
-                    PrintPullRequestList(workItem.GetFullPullRequestList());
+                    PrintPullRequestList(workItem.GetFullPullRequestList().ToArray());
 
                     textWriter.WriteLine();
 
