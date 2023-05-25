@@ -9,13 +9,45 @@ namespace ItemsReport
 {
     public class Config
     {
+        public class FilterClass
+        {
+            public string[] SelectedBranchPaths { get; set; } = Array.Empty<string>();
+
+            public DateTime StartDate { get; set; } = DateTime.MinValue;
+
+            public DateTime EndDate { get; set; } = DateTime.MaxValue;
+
+            public bool IsFiltered
+            {
+                get
+                {
+                    if (StartDate != DateTime.MinValue)
+                    {
+                        return true;
+                    }
+
+                    if (EndDate != DateTime.MaxValue)
+                    {
+                        return true;
+                    }
+
+                    if (SelectedBranchPaths.Length != 0)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
+        }
+
         public string Token => PatContainer.PersonalAccessToken;
 
         public int[] Ids { get; set; } = Array.Empty<int>();
 
         public string OutputFile { get; set; }
 
-        public string[] SelectedBranchPaths { get; set; } = Array.Empty<string>();
+        public FilterClass Filter { get; set; } = new FilterClass();
 
         public static Config GetConfig()
         {

@@ -34,21 +34,40 @@ namespace Test01
 
             WriteLine($"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
 
-            PrinterHtml.Print(workItemList, config);
+            IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(it => it.GetFullPullRequestList().Any(pr => GetPredicate(pr.Request, config)));
+
+            PrinterHtml.Print(new DocumentWorkItemList(filteredList), config);
 
             WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
 
             stopwatch.Stop();
         }
 
+        private static bool GetPredicate(DocumentPullRequest pr, Config config)
+        {
+            Config.FilterClass filter = config.Filter;
+
+            if (!(pr.CloseDate >= filter.StartDate && pr.CloseDate <= filter.EndDate))
+            {
+                return false;
+            }
+
+            if (filter.SelectedBranchPaths.Length == 0)
+            {
+                return true;
+            }
+
+            return filter.SelectedBranchPaths.Contains(pr.TargetRefName);
+        }
+
         private static void RemoveDuplicateItems(IDocumentWorkItemList workItemList)
         {
-            HashSet<IDocumentWorkItem> items = new HashSet<IDocumentWorkItem>(workItemList.GetWorkItems());
+            HashSet<IDocumentWorkItem> items = new HashSet<IDocumentWorkItem>(workItemList);
             HashSet<IDocumentWorkItem> itemsToDelete = new HashSet<IDocumentWorkItem>();
 
             void Rr(IDocumentWorkItemList list)
             {
-                foreach (IDocumentWorkItem workItem in list.GetWorkItems())
+                foreach (IDocumentWorkItem workItem in list)
                 {
                     if (items.Contains(workItem))
                     {
@@ -59,7 +78,7 @@ namespace Test01
                 }
             }
 
-            foreach (DocumentWorkItem workItem in workItemList.GetWorkItems())
+            foreach (IDocumentWorkItem workItem in workItemList)
             {
                 Rr(workItem.SubItems);
             }
@@ -68,7 +87,7 @@ namespace Test01
             string duplicateNumbers = itemsToDelete.Select(i => i.Id).JoinToString(", ");
             WriteLine(duplicateNumbers);
 
-            foreach (DocumentWorkItem workItem in itemsToDelete)
+            foreach (IDocumentWorkItem workItem in itemsToDelete)
             {
                 workItemList.RemoveItem(workItem);
             }

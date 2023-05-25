@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace CommonCode.DocumentClasses
 {
@@ -24,8 +25,10 @@ namespace CommonCode.DocumentClasses
             }
         }
 
-        public IEnumerable<IDocumentWorkItem> GetWorkItems() => _list;
-
         public void RemoveItem(IDocumentWorkItem workItem) => _list.Remove(workItem);
+
+        public IEnumerator<IDocumentWorkItem> GetEnumerator() => _list.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

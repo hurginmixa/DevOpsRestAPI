@@ -15,12 +15,6 @@ namespace ItemsReport
         {
             using TextWriter textWriter = new StreamWriter(PPath.GetExeDirectory() / config.OutputFile);
 
-            string[] branchPaths = config.SelectedBranchPaths;
-
-            bool reportAllItems = branchPaths.Length == 0;
-
-            string[] paths = workItemList.GetUniqueCommittedPaths().Where(path => reportAllItems || branchPaths.Contains(path)).OrderBy(t => t).ToArray();
-
             textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
@@ -29,13 +23,15 @@ namespace ItemsReport
             textWriter.WriteLine("<body>");
             textWriter.WriteLine("<table border='1' class='freeze-table'>");
 
+            string[] reportedPaths = workItemList.GetUniqueCommittedPaths().ToArray();
+
             textWriter.WriteLine("<tr>");
             textWriter.WriteLine("<th class='col-id-number fixed-header'>Id</th>");
             textWriter.WriteLine("<th class='col-type fixed-header'>Type</th>");
             textWriter.WriteLine("<th>State</th>");
             textWriter.WriteLine("<th>Title</th>");
 
-            foreach (string path in paths)
+            foreach (string path in reportedPaths)
             {
                 textWriter.WriteLine($"<th>{HttpUtility.HtmlAttributeEncode(path)}</th>");
             }
@@ -46,14 +42,14 @@ namespace ItemsReport
 
             void PrintPullRequestList(IEnumerable<(DocumentPullRequest Request, bool IsOwner)> pullRequestList)
             {
-                if (paths.Length <= 0)
+                if (reportedPaths.Length <= 0)
                 {
                     return;
                 }
 
                 StringBuilder sb = new StringBuilder();
 
-                foreach (string path in paths)
+                foreach (string path in reportedPaths)
                 {
                     sb.Append("<td>");
 
@@ -106,30 +102,27 @@ namespace ItemsReport
             Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk};
             int colorIndex = -1;
 
+            #region void StartLevelsReporting(IDocumentWorkItemList levelList)
+
+            void StartLevelsReporting(IDocumentWorkItemList levelList)
+            {
+                PrintLevel(levelList, 0, Color.White);
+            }
+
+            #endregion
+
             #region void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
 
             void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
             {
-                foreach (IDocumentWorkItem workItem in levelList.GetWorkItems())
+                foreach (IDocumentWorkItem workItem in levelList)
                 {
-                    (DocumentPullRequest Request, bool IsOwner)[] pullRequestList = workItem.GetFullPullRequestList().Where(re => paths.Contains(re.Request.TargetRefName)).ToArray();
+                    (DocumentPullRequest Request, bool IsOwner)[] pullRequestList = workItem.GetFullPullRequestList().Where(re => reportedPaths.Contains(re.Request.TargetRefName)).ToArray();
 
                     if (levelNumber == 0)
                     {
-                        if (pullRequestList.Length == 0 && !reportAllItems)
-                        {
-                            continue;
-                        }
-
                         colorIndex = (colorIndex + 1) % colors.Length;
                         color = colors[colorIndex];
-                    }
-                    else
-                    {
-                        if (pullRequestList.Length == 0 && !reportAllItems)
-                        {
-                            continue;
-                        }
                     }
 
                     string style = $"background-color:{ColorTranslator.ToHtml(color)};";
@@ -162,24 +155,17 @@ namespace ItemsReport
 
             #endregion
 
-            if (reportAllItems)
-            {
-                textWriter.WriteLine("<tr>");
-                textWriter.WriteLine($"<td colspan='{paths.Length + 4}'><h1>Not completed items</h1></td>");
-                textWriter.WriteLine("</tr>");
+            textWriter.WriteLine("<tr>");
+            textWriter.WriteLine($"<td colspan='{reportedPaths.Length + 4}'><h1>Not completed items</h1></td>");
+            textWriter.WriteLine("</tr>");
 
-                PrintLevel(new DocumentWorkItemList(workItemList.GetWorkItems().Where(r => r.HasActiveSubItems)), 0, Color.White);
+            StartLevelsReporting(levelList: new DocumentWorkItemList(workItemList.Where(r => r.HasActiveSubItems)));
 
-                textWriter.WriteLine("<tr>");
-                textWriter.WriteLine($"<td colspan='{paths.Length + 4}'><h1>Completed items</h1></td>");
-                textWriter.WriteLine("</tr>");
+            textWriter.WriteLine("<tr>");
+            textWriter.WriteLine($"<td colspan='{reportedPaths.Length + 4}'><h1>Completed items</h1></td>");
+            textWriter.WriteLine("</tr>");
 
-                PrintLevel(new DocumentWorkItemList(workItemList.GetWorkItems().Where(r => !r.HasActiveSubItems)), 0, Color.White);
-            }
-            else
-            {
-                PrintLevel(workItemList, 0, Color.White);
-            }
+            StartLevelsReporting(levelList: new DocumentWorkItemList(workItemList.Where(r => !r.HasActiveSubItems)));
 
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");

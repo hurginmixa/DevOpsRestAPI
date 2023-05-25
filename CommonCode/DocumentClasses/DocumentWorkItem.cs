@@ -37,7 +37,7 @@ namespace CommonCode.DocumentClasses
                 pullRequests.Add((Request: pullRequest, IsOwner: true));
             }
 
-            foreach (var subItem in SubItems.GetWorkItems())
+            foreach (var subItem in SubItems)
             {
                 foreach ((DocumentPullRequest Request, bool IsOwner) pullRequest in subItem.GetFullPullRequestList())
                 {
@@ -57,7 +57,7 @@ namespace CommonCode.DocumentClasses
                     return true;
                 }
 
-                return _workItemList.GetWorkItems().Any(r => r.HasActiveSubItems);
+                return _workItemList.Any(r => r.HasActiveSubItems);
             }
         }
 

@@ -11,6 +11,8 @@ namespace CommonCode.DocumentClasses
         IEnumerable<(DocumentPullRequest Request, bool IsOwner)> GetFullPullRequestList();
 
         bool HasActiveSubItems { get; }
+
+        IEnumerable<DocumentPullRequest> PullRequestList { get; }
         
         string Html { get; }
         

@@ -33,7 +33,7 @@ namespace CommonCode
 
             void SearchLevel(IDocumentWorkItemList levelList)
             {
-                foreach (DocumentWorkItem workItem in levelList.GetWorkItems())
+                foreach (IDocumentWorkItem workItem in levelList)
                 {
                     foreach (DocumentPullRequest request in workItem.PullRequestList)
                     {

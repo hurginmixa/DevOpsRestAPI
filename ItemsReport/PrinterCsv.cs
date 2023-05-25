@@ -57,7 +57,7 @@ namespace ItemsReport
 
             void PrintLevel(IDocumentWorkItemList levelList, int levelNumber)
             {
-                foreach (IDocumentWorkItem workItem in levelList.GetWorkItems())
+                foreach (IDocumentWorkItem workItem in levelList)
                 {
                     textWriter.Write($"{workItem.Id},");
                     textWriter.Write($"{workItem.WorkItemType},");

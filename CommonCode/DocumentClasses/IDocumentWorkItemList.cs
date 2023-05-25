@@ -2,11 +2,9 @@
 
 namespace CommonCode.DocumentClasses
 {
-    public interface IDocumentWorkItemList
+    public interface IDocumentWorkItemList : IEnumerable<IDocumentWorkItem>
     {
         void AddWorkItem(IDocumentWorkItem item);
-
-        IEnumerable<IDocumentWorkItem> GetWorkItems();
         
         void RemoveItem(IDocumentWorkItem workItem);
     }
