@@ -28,7 +28,7 @@ namespace Test01
 
             DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
-            await PerformWorkItems(config.Ids, workItemList, 1, config);
+            await PerformWorkItems(workItemNumbers: config.Ids, workItemList: workItemList, levelNumber: 1, config: config);
 
             RemoveDuplicateItems(workItemList);
 
@@ -108,7 +108,7 @@ namespace Test01
 
         private static async Task PerformWorkItem(GitWorkItem gitWorkItem, IDocumentWorkItemList workItemList, int levelNumber, Config config)
         {
-            WriteLine($"{Thread.CurrentThread.ManagedThreadId,2} {levelNumber,2} {gitWorkItem.Id,5} {gitWorkItem.Fields.Title}");
+            WriteLine($"{Thread.CurrentThread.ManagedThreadId,2} {levelNumber,2} {gitWorkItem.Id,5} {gitWorkItem.Fields.WorkItemType} {gitWorkItem.Fields.Title}");
 
             List<int> childList = new List<int>();
             List<int> pullRequestList = new List<int>();

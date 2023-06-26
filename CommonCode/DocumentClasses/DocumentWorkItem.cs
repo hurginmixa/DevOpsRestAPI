@@ -12,7 +12,7 @@ namespace CommonCode.DocumentClasses
         private readonly string _title;
         private readonly string _html;
 
-        private readonly DocumentWorkItemList _workItemList = new();
+        private readonly DocumentWorkItemList _subItemList = new();
         private readonly List<DocumentPullRequest> _pullRequestList = new();
 
         public DocumentWorkItem(GitWorkItem workItem)
@@ -24,7 +24,7 @@ namespace CommonCode.DocumentClasses
             _html = workItem.Links.Html.Href;
         }
 
-        public IDocumentWorkItemList SubItems => _workItemList;
+        public IDocumentWorkItemList SubItems => _subItemList;
 
         public IEnumerable<DocumentPullRequest> PullRequestList => _pullRequestList;
 
@@ -57,7 +57,7 @@ namespace CommonCode.DocumentClasses
                     return true;
                 }
 
-                return _workItemList.Any(r => r.HasActiveSubItems);
+                return _subItemList.Any(r => r.HasActiveSubItems);
             }
         }
 

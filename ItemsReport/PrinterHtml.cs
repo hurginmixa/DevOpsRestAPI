@@ -21,22 +21,24 @@ namespace ItemsReport
             textWriter.WriteLine(GetStyles());
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body>");
-            textWriter.WriteLine("<table border='1' class='freeze-table'>");
+            textWriter.WriteLine("<table>");
 
             string[] reportedPaths = workItemList.GetUniqueCommittedPaths().ToArray();
 
+            textWriter.WriteLine("<thead>");
             textWriter.WriteLine("<tr>");
-            textWriter.WriteLine("<th class='col-id-number fixed-header'>Id</th>");
-            textWriter.WriteLine("<th class='col-type fixed-header'>Type</th>");
-            textWriter.WriteLine("<th>State</th>");
-            textWriter.WriteLine("<th>Title</th>");
+            textWriter.WriteLine("<th class='sticky-column, sticky-row'>Id</th>");
+            textWriter.WriteLine("<th class='sticky-column, sticky-row'>Type</th>");
+            textWriter.WriteLine("<th class='sticky-column, sticky-row'>State</th>");
+            textWriter.WriteLine("<th class='sticky-column, sticky-row'>Title</th>");
 
             foreach (string path in reportedPaths)
             {
-                textWriter.WriteLine($"<th>{HttpUtility.HtmlAttributeEncode(path)}</th>");
+                textWriter.WriteLine($"<th class='sticky-column, sticky-row'>{HttpUtility.HtmlAttributeEncode(path)}</th>");
             }
 
             textWriter.WriteLine("</tr>");
+            textWriter.WriteLine("</thead>");
 
             #region void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
 
@@ -133,8 +135,8 @@ namespace ItemsReport
 
                     textWriter.WriteLine($"<tr style='{style};'>");
 
-                    textWriter.Write($"<td class='col-id-number' scope='row'><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
-                    textWriter.Write($"<td class='col-type' scope='row'>{workItem.WorkItemType}</td>");
+                    textWriter.Write($"<td><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
+                    textWriter.Write($"<td>{workItem.WorkItemType}</td>");
                     textWriter.Write($"<td>{workItem.State}</td>");
 
                     string workItemTitle = workItem.Title;
@@ -174,75 +176,33 @@ namespace ItemsReport
 
         private static string GetStyles()
         {
-            return string.Empty;
-
-            /*return @"
+            return @"
 <style type='text/css'>
-    .freeze-table {
-        border-spacing: 0;
-        font-family: 'Segoe UI', sans-serif, 'Helvetica Neue';
-        font-size: 14px;
-        padding: 0;
-        border: 1px solid #ccc
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 8px;
+    border: 1px solid #ddd;
+  }
 
-    thead th {
-        top: 0;
-        position: sticky;
-        background-color: #666;
-        color: #fff;
-        z-index: 20;
-        min-height: 30px;
-        height: 30px;
-        text-align: left;
-    }
-
-    tr:nth-child(even)
-    {
-        background-color: #f2f2f2;
-    }
-
-    th td {
-        padding: 0;
-        top: 0;
-        outline: 1px solid #ccc;
-        border: none;;
-        outline-offset: -1px;
-        padding-left: 5px;
-    }
-
-    tr {
-        min-height: 25px;
-        height: 25px;
-    }
-
-    .col-id-number
-    {
-        left: 0;
-        position: sticky;
-    }
-
-    .col-type
-    {
-        left: 80;
-        position: sticky;
-    }
-
-    .fixed-header
-    {
-        z-index: 50;
-    }
-
-    tr:nth-child(even) td[scope=row] {
-        background-color: #f2f2f2;
-    }
-
-    tr:nth-child(odd) td[scope=row] {
-        background-color: white;
-    }
-
+  .sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: #f1f1f1;
+  }
+  
+  .sticky-row {
+    position: sticky;
+    background-color: #f1f1f1;
+    z-index: 2;
+    top: 0;
+  }
 </style>
-";*/
+";
         }
     }
 }
