@@ -23,7 +23,7 @@ namespace ItemsReport
             textWriter.WriteLine("<body>");
             textWriter.WriteLine("<table>");
 
-            string[] reportedPaths = workItemList.GetUniqueCommittedPaths().ToArray();
+            string[] reportedPaths = workItemList.GetUniqueCommittedPaths().OrderBy(s => s).ToArray();
 
             textWriter.WriteLine("<thead>");
             textWriter.WriteLine("<tr>");
@@ -49,49 +49,30 @@ namespace ItemsReport
                     return;
                 }
 
+                (DocumentPullRequest Request, bool IsOwner)[] l = pullRequestList.OrderBy(r => r.Request.Id).ToArray();
+
+                string[] r = pullRequestList.GroupBy(r => r.Request.TargetRefName).Select(r => r.Key).ToArray();
+
+
+                Dictionary<string, StringBuilder> builders = reportedPaths.ToDictionary(i => i, i => new StringBuilder());
+
+                foreach ((DocumentPullRequest Request, bool IsOwner) tuple in l)
+                {
+                    foreach (string path in reportedPaths)
+                    {
+                        string linkText = tuple.Request.TargetRefName == path ? GetLinkText(tuple) : "&nbsp;";
+
+                        builders[path].Append($"{linkText}<br>");
+                    }                    
+                }
+
                 StringBuilder sb = new StringBuilder();
 
                 foreach (string path in reportedPaths)
                 {
                     sb.Append("<td>");
 
-                    (DocumentPullRequest request, bool owner)[] pullRequests = pullRequestList.Where(pp => pp.Request.TargetRefName == path).OrderBy(p => p.Request.Id).ToArray();
-
-                    if (pullRequests.Length > 0)
-                    {
-                        IEnumerable<string> enumerable = pullRequests.Select(pullRequest =>
-                        {
-                            string date = $"{pullRequest.request.CloseDate:yyyy/MM/dd HH:mm}";
-                                
-                            string title = $"&ldquo;{pullRequest.request.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{pullRequest.request.CreateBy}&nbsp;{pullRequest.request.Status}";
-
-                            string linkText = $"<span title='{title}'>{pullRequest.request.Id}</span>";
-
-                            if (pullRequest.request.Status == "active")
-                            {
-                                linkText = $"<B>{linkText}</B>";
-                            }
-                            else if (pullRequest.request.Status == "abandoned")
-                            {
-                                linkText = $"<S>{linkText}</S>";
-                            }
-
-                            linkText = $"<a href='https://dev.azure.com/AzCamtek/GIT/_git/CamtekGit/pullrequest/{pullRequest.request.Id}' target='_blank'>{linkText}</a>"; // 😪😪😪
-
-                            if (pullRequest.owner)
-                            {
-                                linkText += "*";
-                            }
-
-                            return linkText;
-                        });
-
-                        sb.Append(enumerable.JoinToString("<br />"));
-                    }
-                    else
-                    {
-                        sb.Append("&nbsp;");
-                    }
+                    sb.Append(builders[path].ToString());
 
                     sb.Append("</td>");
                 }
@@ -172,6 +153,35 @@ namespace ItemsReport
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+        }
+
+        private static string GetLinkText((DocumentPullRequest request, bool owner) pullRequest)
+        {
+            string date = $"{pullRequest.request.CloseDate:yyyy/MM/dd HH:mm}";
+
+            string title =
+                $"&ldquo;{pullRequest.request.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{pullRequest.request.CreateBy}&nbsp;{pullRequest.request.Status}";
+
+            string linkText = $"<span title='{title}'>{pullRequest.request.Id}</span>";
+
+            if (pullRequest.request.Status == "active")
+            {
+                linkText = $"<B>{linkText}</B>";
+            }
+            else if (pullRequest.request.Status == "abandoned")
+            {
+                linkText = $"<S>{linkText}</S>";
+            }
+
+            linkText =
+                $"<a href='https://dev.azure.com/AzCamtek/GIT/_git/CamtekGit/pullrequest/{pullRequest.request.Id}' target='_blank'>{linkText}</a>"; // 😪😪😪
+
+            if (pullRequest.owner)
+            {
+                linkText += "*";
+            }
+
+            return linkText;
         }
 
         private static string GetStyles()
