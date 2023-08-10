@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web;
 using CommonCode;
 using CommonCode.DocumentClasses;
+using CommonCode.DocumentClasses.SerializeClasses;
 using CommonCode.GitClasses;
 using ItemsReport;
 using static System.Console;
@@ -39,6 +40,10 @@ namespace Test01
             PrinterHtml.Print(new DocumentWorkItemList(filteredList), config);
 
             WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
+
+            DocumentWorkItemData[] data = workItemList.GetData();
+
+            string json = CustJsonSerializer.FormatJson(JsonSerializer.Serialize(data));
 
             stopwatch.Stop();
         }

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using CommonCode;
 
 namespace ItemsReport
@@ -43,11 +44,16 @@ namespace ItemsReport
 
         public string Token => PatContainer.PersonalAccessToken;
 
+        [JsonPropertyName("Old Ids")]
+        public int[] OldIds { get; set; } = Array.Empty<int>();
+
         public int[] Ids { get; set; } = Array.Empty<int>();
 
         public string OutputFile { get; set; }
 
         public FilterClass Filter { get; set; } = new FilterClass();
+
+        public int Fofo = 42;
 
         public static Config GetConfig()
         {

@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using CommonCode.DocumentClasses.SerializeClasses;
 
 namespace CommonCode.DocumentClasses
 {
@@ -16,6 +18,8 @@ namespace CommonCode.DocumentClasses
         {
             _list.AddRange(list);
         }
+
+        public DocumentWorkItemData[] GetData() => _list.Select(i => i.GetData()).ToArray();
 
         public void AddWorkItem(IDocumentWorkItem item)
         {

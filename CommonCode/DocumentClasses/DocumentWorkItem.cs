@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CommonCode.DocumentClasses.SerializeClasses;
 using CommonCode.GitClasses;
 
 namespace CommonCode.DocumentClasses
@@ -22,6 +23,23 @@ namespace CommonCode.DocumentClasses
             _state = workItem.Fields.State;
             _title = workItem.Fields.Title;
             _html = workItem.Links.Html.Href;
+        }
+
+        public DocumentWorkItemData GetData()
+        {
+            DocumentWorkItemData workItemData = new DocumentWorkItemData();
+
+            workItemData.Id = _id;
+            workItemData.WorkItemType = _workItemType;
+            workItemData.State = _state;
+            workItemData.Title = _title;
+            workItemData.Html = _html;
+
+            workItemData.SubItemList = _subItemList.GetData();
+
+            workItemData.PullRequestList = _pullRequestList.Select(k => k.GetData()).ToArray();
+
+            return workItemData;
         }
 
         public IDocumentWorkItemList SubItems => _subItemList;

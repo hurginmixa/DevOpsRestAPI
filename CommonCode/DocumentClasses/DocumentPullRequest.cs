@@ -1,4 +1,5 @@
 ﻿using System;
+using CommonCode.DocumentClasses.SerializeClasses;
 using CommonCode.GitClasses;
 
 namespace CommonCode.DocumentClasses
@@ -18,6 +19,19 @@ namespace CommonCode.DocumentClasses
             _targetRefName = pullRequest.TargetRefName.Replace("refs/heads/", "");
             _closeDate = pullRequest.ClosedDate.ToLocalTime();
             _createBy = pullRequest.CreatedBy.DisplayName;
+        }
+
+        public DocumentPullRequestData GetData()
+        {
+            DocumentPullRequestData requestData = new DocumentPullRequestData();
+
+            requestData.Id = _id;
+            requestData.Status = _status;
+            requestData.TargetRefName = _targetRefName;
+            requestData.CloseDate = _closeDate;
+            requestData.CreateBy = _createBy;
+
+            return requestData;
         }
 
         public int Id => _id;
