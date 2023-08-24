@@ -27,6 +27,8 @@ namespace Test01
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            ReadIds(config);
+
             DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
             await PerformWorkItems(workItemNumbers: config.Ids, workItemList: workItemList, levelNumber: 1, config: config);
@@ -45,7 +47,27 @@ namespace Test01
 
             string json = CustJsonSerializer.FormatJson(JsonSerializer.Serialize(data));
 
+            await File.WriteAllTextAsync(PPath.GetExeDirectory() / config.CacheDataFile, json);
+
             stopwatch.Stop();
+        }
+
+        private static void ReadIds(Config config)
+        {
+            string cacheDataFilePath = PPath.GetExeDirectory() / config.CacheDataFile;
+            string json = File.Exists(cacheDataFilePath) ? File.ReadAllText(cacheDataFilePath) : "[]";
+            DocumentWorkItemData[] itemDatas = JsonSerializer.Deserialize<DocumentWorkItemData[]>(json);
+
+            int[] allIds = config.Ids.Union(config.OldIds).ToArray();
+
+            HashSet<int> cachedIds = allIds.Intersect(itemDatas.Select(d => d.Id)).ToHashSet();
+
+            itemDatas.Where(d => cachedIds.Contains(d.Id));
+        }
+
+        private static void CombineIds(int[] ids, int[] oldIds, int[] cacheIds)
+        {
+
         }
 
         private static bool GetPredicate(DocumentPullRequest pr, Config config)

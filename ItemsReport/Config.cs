@@ -51,9 +51,9 @@ namespace ItemsReport
 
         public string OutputFile { get; set; }
 
-        public FilterClass Filter { get; set; } = new FilterClass();
+        public string CacheDataFile { get; set; }
 
-        public int Fofo = 42;
+        public FilterClass Filter { get; set; } = new FilterClass();
 
         public static Config GetConfig()
         {
