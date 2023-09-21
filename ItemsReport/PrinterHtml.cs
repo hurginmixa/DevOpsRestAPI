@@ -19,6 +19,7 @@ namespace ItemsReport
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
             textWriter.WriteLine(GetStyles());
+            textWriter.WriteLine(GetScripts());
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body>");
             textWriter.WriteLine("<table>");
@@ -82,7 +83,7 @@ namespace ItemsReport
 
             #endregion
 
-            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk};
+            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk, Color.DarkGray };
             int colorIndex = -1;
 
             #region void StartLevelsReporting(IDocumentWorkItemList levelList)
@@ -112,6 +113,11 @@ namespace ItemsReport
                     if (pullRequestList.Length == 0 && !workItem.IsClosed)
                     {
                         style += " font-weight: bold;";
+                    }
+
+                    if (levelNumber > 0)
+                    {
+                        style += " visibility: hidden;";
                     }
 
                     textWriter.WriteLine($"<tr style='{style};'>");
@@ -153,6 +159,13 @@ namespace ItemsReport
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+        }
+
+        private static string GetScripts()
+        {
+            return @"
+<script src='Scripts/FirstScript.js'></script>
+" ;
         }
 
         private static string GetLinkText((DocumentPullRequest request, bool owner) pullRequest)
