@@ -1,9 +1,14 @@
 ﻿
 function listenerFunction(ev: Event) 
 {
-    ev = "mixa";
+    if (ev != null) 
+    {
+        alert("Ok2: !!! " + ev.srcElement);
+    }
 
-    alert("Ok2" + ev.srcElement);
+    var a : string = "Mixa11122333444555";
+
+    alert(a);
 }
 
 //document.addEventListener("click", listenerFunction);

@@ -117,10 +117,10 @@ namespace ItemsReport
 
                     if (levelNumber > 0)
                     {
-                        style += " visibility: hidden;";
+                        style += " display: none;";
                     }
 
-                    textWriter.WriteLine($"<tr style='{style};'>");
+                    textWriter.WriteLine($"<tr style='{style}'>");
 
                     textWriter.Write($"<td><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
                     textWriter.Write($"<td>{workItem.WorkItemType}</td>");

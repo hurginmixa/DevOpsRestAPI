@@ -4,13 +4,8 @@
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>ItemsReport</AssemblyName>
     <RootNamespace>ItemsReport</RootNamespace>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.2.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonCode\CommonCode.csproj" />
   </ItemGroup>
@@ -21,14 +16,11 @@
     <None Update="PAT.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\FirstScript.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <TypeScriptCompile Update="Scripts\FirstScript.ts">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </TypeScriptCompile>
   </ItemGroup>
-  <PropertyGroup>
-    <TypeScriptCompileBlocked>True</TypeScriptCompileBlocked>
-  </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="tsc --outDir $(TargetDir)Scripts --listFiles" />
+  </Target>
 </Project>
