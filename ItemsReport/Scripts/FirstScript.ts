@@ -1,14 +1,13 @@
 ﻿
 function listenerFunction(ev: Event) 
 {
-    if (ev != null) 
+    if (ev.srcElement instanceof HTMLTableCellElement) 
     {
-        alert("Ok2: !!! " + ev.srcElement);
+        const cellElement: HTMLTableCellElement = ev.srcElement as HTMLTableCellElement;
+        const rowElement: HTMLTableRowElement = cellElement.parentElement as HTMLTableRowElement;
+
+        alert(`Ok2: !!! ${rowElement.id}`);
     }
-
-    var a : string = "Mixa11122333444555";
-
-    alert(a);
 }
 
 //document.addEventListener("click", listenerFunction);

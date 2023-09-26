@@ -120,7 +120,7 @@ namespace ItemsReport
                         style += " display: none;";
                     }
 
-                    textWriter.WriteLine($"<tr style='{style}'>");
+                    textWriter.WriteLine($"<tr style='{style}' id='{workItem.Id}'>");
 
                     textWriter.Write($"<td><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
                     textWriter.Write($"<td>{workItem.WorkItemType}</td>");
