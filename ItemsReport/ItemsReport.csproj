@@ -32,4 +32,7 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </TypeScriptCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\Debug\net5.0\Scripts\" />
+  </ItemGroup>
 </Project>
