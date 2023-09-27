@@ -1,4 +1,12 @@
 ﻿
+function CollapseAll() {
+    let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_0`);
+    for (let i = 0; i < childList.length; i++) {
+        const element: HTMLElement = <HTMLElement>(childList[i]);
+        CloseAllChilds(element.id);
+    }
+}
+
 function listenerFunction(ev: Event) {
     if (!(ev.target instanceof HTMLTableCellElement)) {
         return;
