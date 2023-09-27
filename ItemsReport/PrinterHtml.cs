@@ -19,6 +19,7 @@ namespace ItemsReport
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
             textWriter.WriteLine(GetStyles());
+            textWriter.WriteLine(GetScripts());
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body>");
             textWriter.WriteLine("<table>");
@@ -82,23 +83,23 @@ namespace ItemsReport
 
             #endregion
 
-            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk};
+            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk, Color.DarkGray };
             int colorIndex = -1;
 
-            #region void StartLevelsReporting(IDocumentWorkItemList levelList)
+            #region void StartLevelsReporting(IDocumentWorkItemList oneLevelItemList)
 
-            void StartLevelsReporting(IDocumentWorkItemList levelList)
+            void StartLevelsReporting(IDocumentWorkItemList oneLevelItemList)
             {
-                PrintLevel(levelList, 0, Color.White);
+                PrintLevel(oneLevelItemList, 0, Color.White, 0);
             }
 
             #endregion
 
-            #region void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
+            #region void PrintLevel(IDocumentWorkItemList oneLevelItemList, int levelNumber, Color color)
 
-            void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
+            void PrintLevel(IDocumentWorkItemList oneLevelItemList, int levelNumber, Color color, int parentItemId)
             {
-                foreach (IDocumentWorkItem workItem in levelList)
+                foreach (IDocumentWorkItem workItem in oneLevelItemList)
                 {
                     (DocumentPullRequest Request, bool IsOwner)[] pullRequestList = workItem.GetFullPullRequestList().Where(re => reportedPaths.Contains(re.Request.TargetRefName)).ToArray();
 
@@ -114,9 +115,15 @@ namespace ItemsReport
                         style += " font-weight: bold;";
                     }
 
-                    textWriter.WriteLine($"<tr style='{style};'>");
+                    textWriter.WriteLine($"<tr style='{style}' id='{workItem.Id}' class='childOf_{parentItemId}'>");
 
-                    textWriter.Write($"<td><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
+                    string markSpan = "";
+                    if (workItem.SubItems.Any())
+                    {
+                        markSpan = "&nbsp;<span id='mark'>[-]</span>";
+                    }
+
+                    textWriter.Write($"<td style='white-space: nowrap'><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{markSpan}</td>");
                     textWriter.Write($"<td>{workItem.WorkItemType}</td>");
                     textWriter.Write($"<td>{workItem.State}</td>");
 
@@ -132,7 +139,7 @@ namespace ItemsReport
 
                     textWriter.WriteLine("</tr>");
 
-                    PrintLevel(workItem.SubItems, levelNumber + 1, color);
+                    PrintLevel(workItem.SubItems, levelNumber + 1, color, workItem.Id);
                 }
             }
 
@@ -142,17 +149,24 @@ namespace ItemsReport
             textWriter.WriteLine($"<td colspan='{reportedPaths.Length + 4}'><h1>Not completed items</h1></td>");
             textWriter.WriteLine("</tr>");
 
-            StartLevelsReporting(levelList: new DocumentWorkItemList(workItemList.Where(r => r.HasActiveSubItems)));
+            StartLevelsReporting(oneLevelItemList: new DocumentWorkItemList(workItemList.Where(r => r.HasActiveSubItems)));
 
             textWriter.WriteLine("<tr>");
             textWriter.WriteLine($"<td colspan='{reportedPaths.Length + 4}'><h1>Completed items</h1></td>");
             textWriter.WriteLine("</tr>");
 
-            StartLevelsReporting(levelList: new DocumentWorkItemList(workItemList.Where(r => !r.HasActiveSubItems)));
+            StartLevelsReporting(oneLevelItemList: new DocumentWorkItemList(workItemList.Where(r => !r.HasActiveSubItems)));
 
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+        }
+
+        private static string GetScripts()
+        {
+            return @"
+<script src='Scripts/FirstScript.js'></script>
+" ;
         }
 
         private static string GetLinkText((DocumentPullRequest request, bool owner) pullRequest)
