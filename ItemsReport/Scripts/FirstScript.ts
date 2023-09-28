@@ -7,7 +7,7 @@ function CollapseAll() {
     }
 }
 
-function listenerFunction(ev: Event) {
+function onDocumentClick(ev: Event) {
     if (!(ev.target instanceof HTMLTableCellElement)) {
         return;
     }
@@ -15,7 +15,7 @@ function listenerFunction(ev: Event) {
     const cellElement: HTMLTableCellElement = ev.target as HTMLTableCellElement;
     const rowElement: HTMLTableRowElement = cellElement.parentElement as HTMLTableRowElement;
 
-    let markDiv : HTMLElement = GetMarkDivElement(rowElement);
+    let markDiv : HTMLElement = GetMarkSpanElement(rowElement);
 
     if (markDiv?.innerText === "[+]") 
     {
@@ -51,13 +51,13 @@ function CloseAllChilds(ownerId: string) {
         child.style.display = "none";
     }
 
-    let markDiv =  GetMarkDivElement(document.getElementById(ownerId));
+    let markDiv =  GetMarkSpanElement(document.getElementById(ownerId));
     if (markDiv != null) {
         markDiv.innerText = "[+]";
     }
 }
 
-function GetMarkDivElement(src : HTMLElement) : HTMLElement {
+function GetMarkSpanElement(src : HTMLElement) : HTMLElement {
     let divList: HTMLCollectionOf<HTMLSpanElement> = src.getElementsByTagName("span");
     for (let i = 0; i < divList.length; i++) {
         const element: HTMLElement = divList[i];
@@ -69,6 +69,4 @@ function GetMarkDivElement(src : HTMLElement) : HTMLElement {
     return null;
 }
 
-//document.addEventListener("click", listenerFunction);
-
-document.onclick = listenerFunction;
+document.ondblclick = onDocumentClick;
