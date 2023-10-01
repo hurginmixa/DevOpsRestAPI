@@ -1,5 +1,5 @@
-﻿const openItem = "[\u25e2]";
-const closeItem = "[\u25b7]";
+﻿const openItem = "\u25e2";
+const closeItem = "\u25b7";
 
 function OnCollapseAll()
 {

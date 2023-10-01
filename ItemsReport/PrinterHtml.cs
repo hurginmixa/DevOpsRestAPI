@@ -120,21 +120,23 @@ namespace ItemsReport
 
                     textWriter.WriteLine($"<tr style='{style}' id='{workItem.Id}' class='childOf_{parentItemId}'>");
 
-                    string markSpan = "[\u25A2]";
+                    string markSpan = "\u25A2";
                     if (workItem.SubItems.Any())
                     {
-                        markSpan = $"<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >[\u25e2]</span>";
+                        markSpan = $"<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >\u25e2</span>";
                     }
 
                     string lineShift = "&nbsp;";
                     if (levelNumber != 0)
                     {
-                        lineShift = string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 2));
+                        lineShift = string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 5));
 
-                        lineShift += string.Concat(Enumerable.Repeat(">&nbsp;", levelNumber));
+                        //lineShift += string.Concat(Enumerable.Repeat(">&nbsp;", levelNumber));
+
+                        lineShift += "&nbsp;&nbsp;";
                     }
 
-                    textWriter.Write($"<td style='white-space: nowrap'>{markSpan}{lineShift}<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
+                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
                     textWriter.Write($"<td>{workItem.WorkItemType}</td>");
                     textWriter.Write($"<td>{workItem.State}</td>");
 
