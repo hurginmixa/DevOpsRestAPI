@@ -13,8 +13,10 @@ namespace ItemsReport
     {
         public static void Print(IDocumentWorkItemList workItemList, Config config)
         {
-            using TextWriter textWriter = new StreamWriter(PPath.GetExeDirectory() / config.OutputFile);
+            using Stream textStream = new FileStream(PPath.GetExeDirectory() / config.OutputFile, FileMode.Create);
+            using TextWriter textWriter = new StreamWriter(textStream, Encoding.UTF8);
 
+            textWriter.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
             textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
@@ -22,7 +24,7 @@ namespace ItemsReport
             textWriter.WriteLine(GetScripts());
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body>");
-            textWriter.WriteLine("&nbsp;&nbsp;&nbsp;<button onclick='CollapseAll()' class='favorite styled'>Collapse All</button><br /><br />");
+            textWriter.WriteLine("&nbsp;&nbsp;&nbsp;<button onclick='OnCollapseAll()' class='favorite styled'>Collapse All</button><br /><br />");
             textWriter.WriteLine("<table>");
 
             string[] reportedPaths = workItemList.GetUniqueCommittedPaths().OrderBy(s => s).ToArray();
@@ -121,7 +123,7 @@ namespace ItemsReport
                     string markSpan = "";
                     if (workItem.SubItems.Any())
                     {
-                        markSpan = "&nbsp;<span id='mark'>[-]</span>";
+                        markSpan = $"&nbsp;<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >[\u25e2]</span>";
                     }
 
                     textWriter.Write($"<td style='white-space: nowrap'><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{markSpan}</td>");
@@ -134,7 +136,17 @@ namespace ItemsReport
                         workItemTitle = $"<S>{workItemTitle}</S>";
                     }
 
-                    textWriter.Write($"<td>{string.Concat(Enumerable.Repeat("*&nbsp;", levelNumber))}{workItemTitle}</td>");
+                    string lineShift = "&nbsp;";
+                    if (levelNumber != 0)
+                    {
+                        lineShift = string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 2));
+
+                        lineShift += string.Concat(Enumerable.Repeat(">&nbsp;", levelNumber));
+                    }
+
+                    textWriter.Write($"<td><span style='white-space: nowrap'>{lineShift}</span></td>");
+
+                    textWriter.Write($"<td>{workItemTitle}</td>");
 
                     PrintPullRequestList(pullRequestList);
 

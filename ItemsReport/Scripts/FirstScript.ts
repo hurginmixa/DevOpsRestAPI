@@ -1,72 +1,82 @@
-﻿
-function CollapseAll() {
+﻿const openItem = "[\u25e2]";
+const closeItem = "[\u25b7]";
+
+function OnCollapseAll()
+{
     let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_0`);
-    for (let i = 0; i < childList.length; i++) {
+    for (let i = 0; i < childList.length; i++)
+    {
         const element: HTMLElement = <HTMLElement>(childList[i]);
         CloseAllChilds(element.id);
     }
 }
 
-function onDocumentClick(ev: Event) {
-    if (!(ev.target instanceof HTMLTableCellElement)) {
-        return;
+function OnMarkClick(markDiv: HTMLElement, ownerId : string) : boolean
+{
+    if (!(markDiv instanceof HTMLSpanElement))
+    {
+        return true;
     }
 
-    const cellElement: HTMLTableCellElement = ev.target as HTMLTableCellElement;
-    const rowElement: HTMLTableRowElement = cellElement.parentElement as HTMLTableRowElement;
-
-    let markDiv : HTMLElement = GetMarkSpanElement(rowElement);
-
-    if (markDiv?.innerText === "[+]") 
+    if (markDiv.innerText === closeItem)
     {
-        markDiv.innerText = "[-]";
+        markDiv.innerText = openItem;
 
-        let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_${rowElement.id}`);
-        for (let i = 0; i < childList.length; i++) {
+        let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_${ownerId}`);
+        for (let i = 0; i < childList.length; i++)
+        {
             const element: HTMLElement = <HTMLElement>(childList[i]);
             element.style.display = "";
         }
 
-        return;
+        return false;
     }
 
-    if (markDiv?.innerText === "[-]") {
-        CloseAllChilds(rowElement.id);
+    if (markDiv.innerText === openItem)
+    {
+        CloseAllChilds(ownerId);
 
-        return;
+        return false;
     }
+
+    return true;
 }
 
-function CloseAllChilds(ownerId: string) {
+function CloseAllChilds(ownerId: string)
+{
     let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_${ownerId}`);
 
-    if (childList.length === 0) {
+    if (childList.length === 0)
+    {
         return;
     }
 
-    for (var i = 0; i < childList.length; i++) {
+    for (var i = 0; i < childList.length; i++)
+    {
         const child: HTMLElement = <HTMLElement>(childList[i]);
         CloseAllChilds(child.id);
 
         child.style.display = "none";
     }
 
-    let markDiv =  GetMarkSpanElement(document.getElementById(ownerId));
-    if (markDiv != null) {
-        markDiv.innerText = "[+]";
+    let markDiv = GetMarkSpanElement(document.getElementById(ownerId));
+    if (markDiv != null)
+    {
+        markDiv.innerText = closeItem;
     }
 }
 
-function GetMarkSpanElement(src : HTMLElement) : HTMLElement {
+function GetMarkSpanElement(src: HTMLElement): HTMLElement
+{
     let divList: HTMLCollectionOf<HTMLSpanElement> = src.getElementsByTagName("span");
-    for (let i = 0; i < divList.length; i++) {
+    for (let i = 0; i < divList.length; i++)
+    {
         const element: HTMLElement = divList[i];
-        if (element.id === "mark") {
+        if (element.id === "mark")
+        {
             return element;
         }
     }
 
     return null;
 }
-
-document.ondblclick = onDocumentClick;
