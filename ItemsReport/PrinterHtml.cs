@@ -120,20 +120,10 @@ namespace ItemsReport
 
                     textWriter.WriteLine($"<tr style='{style}' id='{workItem.Id}' class='childOf_{parentItemId}'>");
 
-                    string markSpan = "";
+                    string markSpan = "[\u25A2]";
                     if (workItem.SubItems.Any())
                     {
-                        markSpan = $"&nbsp;<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >[\u25e2]</span>";
-                    }
-
-                    textWriter.Write($"<td style='white-space: nowrap'><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{markSpan}</td>");
-                    textWriter.Write($"<td>{workItem.WorkItemType}</td>");
-                    textWriter.Write($"<td>{workItem.State}</td>");
-
-                    string workItemTitle = workItem.Title;
-                    if (workItem.IsClosed && pullRequestList.Length == 0)
-                    {
-                        workItemTitle = $"<S>{workItemTitle}</S>";
+                        markSpan = $"<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >[\u25e2]</span>";
                     }
 
                     string lineShift = "&nbsp;";
@@ -144,7 +134,15 @@ namespace ItemsReport
                         lineShift += string.Concat(Enumerable.Repeat(">&nbsp;", levelNumber));
                     }
 
-                    textWriter.Write($"<td><span style='white-space: nowrap'>{lineShift}</span></td>");
+                    textWriter.Write($"<td style='white-space: nowrap'>{markSpan}{lineShift}<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
+                    textWriter.Write($"<td>{workItem.WorkItemType}</td>");
+                    textWriter.Write($"<td>{workItem.State}</td>");
+
+                    string workItemTitle = workItem.Title;
+                    if (workItem.IsClosed && pullRequestList.Length == 0)
+                    {
+                        workItemTitle = $"<S>{workItemTitle}</S>";
+                    }
 
                     textWriter.Write($"<td>{workItemTitle}</td>");
 
