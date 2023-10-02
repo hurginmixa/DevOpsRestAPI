@@ -62,6 +62,8 @@ namespace Test01
 		
         private static void ReadIds(Config config)
         {
+            string cacheDataFilePath = PPath.GetExeDirectory() / config.CacheDataFile;
+            string json = File.Exists(cacheDataFilePath) ? File.ReadAllText(cacheDataFilePath) : "[]";
             DocumentWorkItemData[] itemDatas = JsonSerializer.Deserialize<DocumentWorkItemData[]>(json);
 
             int[] allIds = config.Ids.Union(config.OldIds).ToArray();
