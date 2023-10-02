@@ -140,7 +140,12 @@ namespace ItemsReport
 
                     textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{subItemsCount}</td>");
 
-                    string workItemTitle = $"<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItem.Title}";
+                    // ------------ workItemTitle
+
+                    Color folderColor = GetFolderColor(workItem);
+                    string folder = $"<span style='color: {ColorTranslator.ToHtml(folderColor)};'>&#128447;</span>&nbsp;";
+
+                    string workItemTitle = $"{folder}<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItem.Title}";
                     if (workItem.IsClosed && pullRequestList.Length == 0)
                     {
                         workItemTitle = $"<S>{workItemTitle}</S>";
@@ -148,6 +153,7 @@ namespace ItemsReport
 
                     textWriter.Write($"<td>{workItemTitle}</td>");
 
+                    // ------------ state
                     textWriter.Write($"<td>{workItem.State}</td>");
 
                     textWriter.Write($"<td>{workItem.AssignedTo}</td>");
@@ -177,6 +183,24 @@ namespace ItemsReport
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+        }
+
+        private static Color GetFolderColor(IDocumentWorkItem workItem)
+        {
+
+            switch (workItem.WorkItemType)
+            {
+                case "Bug" : return Color.Red;
+                case "Task" : return Color.Yellow;
+                case "Task-Validation" : return Color.GreenYellow;
+                case "Feature" : return Color.BlueViolet;
+                case "Requirement" : return Color.DodgerBlue;
+                case "Issue" : return Color.DarkRed;
+
+                default: return Color.Black;
+            }
+
+            throw new System.NotImplementedException();
         }
 
         private static string GetScripts()
