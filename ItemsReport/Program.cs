@@ -22,40 +22,46 @@ namespace Test01
     {
         static async Task Main()
         {
-            Config config = Config.GetConfig();
+            try
+            {
+                Config config = Config.GetConfig();
 
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
 
-            ReadIds(config);
+                ReadIds(config);
 
-            DocumentWorkItemList workItemList = new DocumentWorkItemList();
+                DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
-            await PerformWorkItems(workItemNumbers: config.Ids, workItemList: workItemList, levelNumber: 1, config: config);
+                await PerformWorkItems(workItemNumbers: config.Ids, workItemList: workItemList, levelNumber: 1, config: config);
 
-            RemoveDuplicateItems(workItemList);
+                RemoveDuplicateItems(workItemList);
 
-            WriteLine($"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
+                WriteLine($"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
 
-            IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(it => it.GetFullPullRequestList().Any(pr => GetPredicate(pr.Request, config)));
+                IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(it => it.GetFullPullRequestList().Any(pr => GetPredicate(pr.Request, config)));
 
-            PrinterHtml.Print(new DocumentWorkItemList(filteredList), config);
+                PrinterHtml.Print(new DocumentWorkItemList(filteredList), config);
 
-            WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
+                WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
 
-            DocumentWorkItemData[] data = workItemList.GetData();
+                DocumentWorkItemData[] data = workItemList.GetData();
 
-            string json = CustJsonSerializer.FormatJson(JsonSerializer.Serialize(data));
+                string json = CustJsonSerializer.FormatJson(JsonSerializer.Serialize(data));
 
-            await File.WriteAllTextAsync(PPath.GetExeDirectory() / config.CacheDataFile, json);
+                await File.WriteAllTextAsync(PPath.GetExeDirectory() / config.CacheDataFile, json);
 
-            stopwatch.Stop();
-        }
-
+                stopwatch.Stop();
+            }
+            catch (Exception e)
+            {
+                WriteLine(e);
+                Console.ReadKey();
+            }
+		}
+		
         private static void ReadIds(Config config)
         {
-            string cacheDataFilePath = PPath.GetExeDirectory() / config.CacheDataFile;
-            string json = File.Exists(cacheDataFilePath) ? File.ReadAllText(cacheDataFilePath) : "[]";
             DocumentWorkItemData[] itemDatas = JsonSerializer.Deserialize<DocumentWorkItemData[]>(json);
 
             int[] allIds = config.Ids.Union(config.OldIds).ToArray();

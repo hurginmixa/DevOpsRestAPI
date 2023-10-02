@@ -13,14 +13,18 @@ namespace ItemsReport
     {
         public static void Print(IDocumentWorkItemList workItemList, Config config)
         {
-            using TextWriter textWriter = new StreamWriter(PPath.GetExeDirectory() / config.OutputFile);
+            using Stream textStream = new FileStream(PPath.GetExeDirectory() / config.OutputFile, FileMode.Create);
+            using TextWriter textWriter = new StreamWriter(textStream, Encoding.UTF8);
 
+            textWriter.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
             textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
             textWriter.WriteLine(GetStyles());
+            textWriter.WriteLine(GetScripts());
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body>");
+            textWriter.WriteLine("&nbsp;&nbsp;&nbsp;<button onclick='OnCollapseAll()' class='favorite styled'>Collapse All</button><br /><br />");
             textWriter.WriteLine("<table>");
 
             string[] reportedPaths = workItemList.GetUniqueCommittedPaths().OrderBy(s => s).ToArray();
@@ -82,23 +86,23 @@ namespace ItemsReport
 
             #endregion
 
-            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk};
+            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk, Color.DarkGray };
             int colorIndex = -1;
 
-            #region void StartLevelsReporting(IDocumentWorkItemList levelList)
+            #region void StartLevelsReporting(IDocumentWorkItemList oneLevelItemList)
 
-            void StartLevelsReporting(IDocumentWorkItemList levelList)
+            void StartLevelsReporting(IDocumentWorkItemList oneLevelItemList)
             {
-                PrintLevel(levelList, 0, Color.White);
+                PrintLevel(oneLevelItemList, 0, Color.White, 0);
             }
 
             #endregion
 
-            #region void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
+            #region void PrintLevel(IDocumentWorkItemList oneLevelItemList, int levelNumber, Color color)
 
-            void PrintLevel(IDocumentWorkItemList levelList, int levelNumber, Color color)
+            void PrintLevel(IDocumentWorkItemList oneLevelItemList, int levelNumber, Color color, int parentItemId)
             {
-                foreach (IDocumentWorkItem workItem in levelList)
+                foreach (IDocumentWorkItem workItem in oneLevelItemList)
                 {
                     (DocumentPullRequest Request, bool IsOwner)[] pullRequestList = workItem.GetFullPullRequestList().Where(re => reportedPaths.Contains(re.Request.TargetRefName)).ToArray();
 
@@ -114,9 +118,25 @@ namespace ItemsReport
                         style += " font-weight: bold;";
                     }
 
-                    textWriter.WriteLine($"<tr style='{style};'>");
+                    textWriter.WriteLine($"<tr style='{style}' id='{workItem.Id}' class='childOf_{parentItemId}'>");
 
-                    textWriter.Write($"<td><a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
+                    string markSpan = "\u25A2";
+                    if (workItem.SubItems.Any())
+                    {
+                        markSpan = $"<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >\u25e2</span>";
+                    }
+
+                    string lineShift = "&nbsp;";
+                    if (levelNumber != 0)
+                    {
+                        lineShift = string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 5));
+
+                        //lineShift += string.Concat(Enumerable.Repeat(">&nbsp;", levelNumber));
+
+                        lineShift += "&nbsp;&nbsp;";
+                    }
+
+                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
                     textWriter.Write($"<td>{workItem.WorkItemType}</td>");
                     textWriter.Write($"<td>{workItem.State}</td>");
 
@@ -126,13 +146,13 @@ namespace ItemsReport
                         workItemTitle = $"<S>{workItemTitle}</S>";
                     }
 
-                    textWriter.Write($"<td>{string.Concat(Enumerable.Repeat("*&nbsp;", levelNumber))}{workItemTitle}</td>");
+                    textWriter.Write($"<td>{workItemTitle}</td>");
 
                     PrintPullRequestList(pullRequestList);
 
                     textWriter.WriteLine("</tr>");
 
-                    PrintLevel(workItem.SubItems, levelNumber + 1, color);
+                    PrintLevel(workItem.SubItems, levelNumber + 1, color, workItem.Id);
                 }
             }
 
@@ -142,17 +162,24 @@ namespace ItemsReport
             textWriter.WriteLine($"<td colspan='{reportedPaths.Length + 4}'><h1>Not completed items</h1></td>");
             textWriter.WriteLine("</tr>");
 
-            StartLevelsReporting(levelList: new DocumentWorkItemList(workItemList.Where(r => r.HasActiveSubItems)));
+            StartLevelsReporting(oneLevelItemList: new DocumentWorkItemList(workItemList.Where(r => r.HasActiveSubItems)));
 
             textWriter.WriteLine("<tr>");
             textWriter.WriteLine($"<td colspan='{reportedPaths.Length + 4}'><h1>Completed items</h1></td>");
             textWriter.WriteLine("</tr>");
 
-            StartLevelsReporting(levelList: new DocumentWorkItemList(workItemList.Where(r => !r.HasActiveSubItems)));
+            StartLevelsReporting(oneLevelItemList: new DocumentWorkItemList(workItemList.Where(r => !r.HasActiveSubItems)));
 
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+        }
+
+        private static string GetScripts()
+        {
+            return @"
+<script src='Scripts/FirstScript.js'></script>
+" ;
         }
 
         private static string GetLinkText((DocumentPullRequest request, bool owner) pullRequest)
@@ -211,6 +238,33 @@ namespace ItemsReport
     z-index: 2;
     top: 0;
   }
+  
+  .styled {
+    border: 0;
+    line-height: 2.5;
+    padding: 0 20px;
+    font-size: 1rem;
+    text-align: center;
+    color: #fff;
+    text-shadow: 1px 1px 1px #000;
+    border-radius: 10px;
+    background-color: rgba(220, 0, 0, 1);
+    background-image: linear-gradient(to top left, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) 30%, rgba(0, 0, 0, 0));
+    box-shadow:
+      inset 2px 2px 3px rgba(255, 255, 255, 0.6),
+      inset -2px -2px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  .styled:hover {
+    background-color: rgba(255, 0, 0, 1);
+  }
+
+  .styled:active {
+    box-shadow:
+      inset -2px -2px 3px rgba(255, 255, 255, 0.6),
+      inset 2px 2px 3px rgba(0, 0, 0, 0.6);
+  }
+
 </style>
 ";
         }
