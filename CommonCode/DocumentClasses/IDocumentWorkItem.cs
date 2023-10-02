@@ -17,6 +17,8 @@ namespace CommonCode.DocumentClasses
         string Html { get; }
         
         string State { get; }
+
+        string AssignedTo { get; }
         
         string WorkItemType { get; }
         

@@ -32,9 +32,9 @@ namespace ItemsReport
             textWriter.WriteLine("<thead>");
             textWriter.WriteLine("<tr>");
             textWriter.WriteLine("<th class='sticky-column, sticky-row'>Id</th>");
-            textWriter.WriteLine("<th class='sticky-column, sticky-row'>Type</th>");
-            textWriter.WriteLine("<th class='sticky-column, sticky-row'>State</th>");
             textWriter.WriteLine("<th class='sticky-column, sticky-row'>Title</th>");
+            textWriter.WriteLine("<th class='sticky-column, sticky-row'>State</th>");
+            textWriter.WriteLine("<th class='sticky-column, sticky-row'>Assign To</th>");
 
             foreach (string path in reportedPaths)
             {
@@ -136,17 +136,21 @@ namespace ItemsReport
                         lineShift += "&nbsp;&nbsp;";
                     }
 
-                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
-                    textWriter.Write($"<td>{workItem.WorkItemType}</td>");
-                    textWriter.Write($"<td>{workItem.State}</td>");
+                    string subItemsCount = workItem.SubItems.Any() ? $"&nbsp;(&nbsp;{workItem.SubItems.Count()}&nbsp;)" : string.Empty;
 
-                    string workItemTitle = workItem.Title;
+                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{subItemsCount}</td>");
+
+                    string workItemTitle = $"<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItem.Title}";
                     if (workItem.IsClosed && pullRequestList.Length == 0)
                     {
                         workItemTitle = $"<S>{workItemTitle}</S>";
                     }
 
                     textWriter.Write($"<td>{workItemTitle}</td>");
+
+                    textWriter.Write($"<td>{workItem.State}</td>");
+
+                    textWriter.Write($"<td>{workItem.AssignedTo}</td>");
 
                     PrintPullRequestList(pullRequestList);
 
