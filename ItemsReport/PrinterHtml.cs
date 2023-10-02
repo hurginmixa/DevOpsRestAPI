@@ -145,13 +145,14 @@ namespace ItemsReport
                     Color folderColor = GetFolderColor(workItem);
                     string folder = $"<span style='color: {ColorTranslator.ToHtml(folderColor)};'>&#128447;</span>&nbsp;";
 
-                    string workItemTitle = $"{folder}<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItem.Title}";
+                    string workItemTitle = workItem.Title;
                     if (workItem.IsClosed && pullRequestList.Length == 0)
                     {
                         workItemTitle = $"<S>{workItemTitle}</S>";
                     }
+                    string workItemText = $"{folder}<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItemTitle}";
 
-                    textWriter.Write($"<td>{workItemTitle}</td>");
+                    textWriter.Write($"<td>{workItemText}</td>");
 
                     // ------------ state
                     textWriter.Write($"<td>{workItem.State}</td>");
