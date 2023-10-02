@@ -21,26 +21,34 @@ namespace Test01
     {
         static async Task Main()
         {
-            Config config = Config.GetConfig();
+            try
+            {
+                Config config = Config.GetConfig();
 
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
 
-            DocumentWorkItemList workItemList = new DocumentWorkItemList();
+                DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
-            await PerformWorkItems(workItemNumbers: config.Ids, workItemList: workItemList, levelNumber: 1, config: config);
+                await PerformWorkItems(workItemNumbers: config.Ids, workItemList: workItemList, levelNumber: 1, config: config);
 
-            RemoveDuplicateItems(workItemList);
+                RemoveDuplicateItems(workItemList);
 
-            WriteLine($"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
+                WriteLine($"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
 
-            IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(it => it.GetFullPullRequestList().Any(pr => GetPredicate(pr.Request, config)));
+                IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(it => it.GetFullPullRequestList().Any(pr => GetPredicate(pr.Request, config)));
 
-            PrinterHtml.Print(new DocumentWorkItemList(filteredList), config);
+                PrinterHtml.Print(new DocumentWorkItemList(filteredList), config);
 
-            WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
+                WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
 
-            stopwatch.Stop();
+                stopwatch.Stop();
+            }
+            catch (Exception e)
+            {
+                WriteLine(e);
+                Console.ReadKey();
+            }
         }
 
         private static bool GetPredicate(DocumentPullRequest pr, Config config)
