@@ -1,5 +1,12 @@
-﻿const openItem = "\u25e2";
-const closeItem = "\u25b7";
+﻿const openItemCode : number = 128449;
+const closeItemCode : number = 128448;
+
+const openItemText = "\u{1F5C1}";
+const closeItemText : string = "\u{1F5C0}";
+
+//const openItemText = String.fromCharCode(openItemCode, 16);
+alert(openItemText);
+
 
 function OnCollapseAll()
 {
@@ -18,9 +25,9 @@ function OnMarkClick(markDiv: HTMLElement, ownerId : string) : boolean
         return true;
     }
 
-    if (markDiv.innerText === closeItem)
+    if (markDiv.innerText === closeItemText)
     {
-        markDiv.innerText = openItem;
+        markDiv.innerText = openItemText;
 
         let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_${ownerId}`);
         for (let i = 0; i < childList.length; i++)
@@ -32,7 +39,7 @@ function OnMarkClick(markDiv: HTMLElement, ownerId : string) : boolean
         return false;
     }
 
-    if (markDiv.innerText === openItem)
+    if (markDiv.innerText === openItemText)
     {
         CloseAllChilds(ownerId);
 
@@ -51,7 +58,7 @@ function CloseAllChilds(ownerId: string)
         return;
     }
 
-    for (var i = 0; i < childList.length; i++)
+    for (let i = 0; i < childList.length; i++)
     {
         const child: HTMLElement = <HTMLElement>(childList[i]);
         CloseAllChilds(child.id);
@@ -62,7 +69,7 @@ function CloseAllChilds(ownerId: string)
     let markDiv = GetMarkSpanElement(document.getElementById(ownerId));
     if (markDiv != null)
     {
-        markDiv.innerText = closeItem;
+        markDiv.innerText = closeItemText;
     }
 }
 

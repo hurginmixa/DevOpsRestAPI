@@ -120,10 +120,12 @@ namespace ItemsReport
 
                     textWriter.WriteLine($"<tr style='{style}' id='{workItem.Id}' class='childOf_{parentItemId}'>");
 
-                    string markSpan = "\u25A2";
+                    Color folderColor = GetFolderColor(workItem);
+
+                    string markSpan = "&#128466;"; // 🗒
                     if (workItem.SubItems.Any())
                     {
-                        markSpan = $"<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >\u25e2</span>";
+                        markSpan = $"<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer; color: {ColorTranslator.ToHtml(folderColor)};' >&#128449;</span>"; // 🗁
                     }
 
                     string lineShift = "&nbsp;";
@@ -142,7 +144,6 @@ namespace ItemsReport
 
                     // ------------ workItemTitle
 
-                    Color folderColor = GetFolderColor(workItem);
                     string folder = $"<span style='color: {ColorTranslator.ToHtml(folderColor)};'>&#128447;</span>&nbsp;";
 
                     string workItemTitle = $"{folder}<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItem.Title}";
