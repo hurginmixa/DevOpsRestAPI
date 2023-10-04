@@ -57,13 +57,7 @@ namespace ItemsReport
 
         public static Config GetConfig()
         {
-            Assembly assembly = Assembly.GetEntryAssembly();
-            Debug.Assert(assembly != null);
-
-            string directoryName = Path.GetDirectoryName(assembly.Location);
-            Debug.Assert(directoryName != null);
-
-            string json = File.ReadAllText(Path.Combine(directoryName, "Config.json"));
+            string json = File.ReadAllText(PPath.GetExeDirectory() / "Config.json");
 
             return JsonSerializer.Deserialize<Config>(json);
         }

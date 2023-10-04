@@ -50,7 +50,7 @@ namespace CommonCode.DocumentClasses
         {
             HashSet<(DocumentPullRequest Request, bool IsOwner)> pullRequests = new();
 
-            foreach (DocumentPullRequest pullRequest in PullRequestList)
+            foreach (DocumentPullRequest pullRequest in _pullRequestList)
             {
                 pullRequests.Add((Request: pullRequest, IsOwner: true));
             }

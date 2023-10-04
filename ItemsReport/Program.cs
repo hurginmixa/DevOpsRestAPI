@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using CommonCode;
 using CommonCode.DocumentClasses;
 using CommonCode.DocumentClasses.SerializeClasses;
 using CommonCode.GitClasses;
-using ItemsReport;
 using static System.Console;
 
-namespace Test01
+namespace ItemsReport
 {
     public static class Program
     {
@@ -45,11 +40,7 @@ namespace Test01
 
                 WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
 
-                DocumentWorkItemData[] data = workItemList.GetData();
-
-                string json = CustJsonSerializer.FormatJson(JsonSerializer.Serialize(data));
-
-                await File.WriteAllTextAsync(PPath.GetExeDirectory() / config.CacheDataFile, json);
+                CacheHandler.SaveToCache(workItemList, config);
 
                 stopwatch.Stop();
             }
@@ -59,12 +50,10 @@ namespace Test01
                 Console.ReadKey();
             }
 		}
-		
+
         private static void ReadIds(Config config)
         {
-            string cacheDataFilePath = PPath.GetExeDirectory() / config.CacheDataFile;
-            string json = File.Exists(cacheDataFilePath) ? File.ReadAllText(cacheDataFilePath) : "[]";
-            DocumentWorkItemData[] itemDatas = JsonSerializer.Deserialize<DocumentWorkItemData[]>(json);
+            DocumentWorkItemData[] itemDatas = CacheHandler.ReadFromCache(config);
 
             int[] allIds = config.Ids.Union(config.OldIds).ToArray();
 
@@ -181,6 +170,8 @@ namespace Test01
                 Task<string>[] pullRequestTasks = pullRequestList.OrderBy(rr => rr)
                     .Select(pullRequestId => HttpTools.GetPullRequestById(pullRequestId, config.Token))
                     .ToArray();
+
+                Task.WaitAll(pullRequestTasks.Cast<Task>().ToArray());
 
                 foreach (Task<string> pullRequestTask in pullRequestTasks)
                 {
