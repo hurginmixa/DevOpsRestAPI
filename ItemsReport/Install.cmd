@@ -19,4 +19,7 @@ copy %srcFolder%PAT.txt %targetFolder%
 copy %srcScriptsFolder%FirstScript.js %targetScriptsFolder%
 copy %srcScriptsFolder%FirstScript.js.map %targetScriptsFolder%
 
+copy %srcScriptsFolder%MarkSpan.js %targetScriptsFolder%
+copy %srcScriptsFolder%MarkSpan.js.map %targetScriptsFolder%
+
 pause

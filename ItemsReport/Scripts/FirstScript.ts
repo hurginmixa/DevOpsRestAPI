@@ -1,5 +1,4 @@
-﻿const openItem = "\u25e2";
-const closeItem = "\u25b7";
+﻿import { MarkDiv } from "./MarkSpan";
 
 function OnCollapseAll()
 {
@@ -11,16 +10,18 @@ function OnCollapseAll()
     }
 }
 
-function OnMarkClick(markDiv: HTMLElement, ownerId : string) : boolean
+function OnMarkClick(markSpanElement: HTMLElement, ownerId : string) : boolean
 {
-    if (!(markDiv instanceof HTMLSpanElement))
+    if (!(markSpanElement instanceof HTMLSpanElement))
     {
         return true;
     }
 
-    if (markDiv.innerText === closeItem)
+    const markSpan : MarkDiv = new MarkDiv(markSpanElement);
+
+    if (markSpan.IsClose)
     {
-        markDiv.innerText = openItem;
+        markSpan.Open();
 
         let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_${ownerId}`);
         for (let i = 0; i < childList.length; i++)
@@ -32,7 +33,7 @@ function OnMarkClick(markDiv: HTMLElement, ownerId : string) : boolean
         return false;
     }
 
-    if (markDiv.innerText === openItem)
+    if (!markSpan.IsClose)
     {
         CloseAllChilds(ownerId);
 
@@ -59,24 +60,5 @@ function CloseAllChilds(ownerId: string)
         child.style.display = "none";
     }
 
-    let markDiv = GetMarkSpanElement(document.getElementById(ownerId));
-    if (markDiv != null)
-    {
-        markDiv.innerText = closeItem;
-    }
-}
-
-function GetMarkSpanElement(src: HTMLElement): HTMLElement
-{
-    let divList: HTMLCollectionOf<HTMLSpanElement> = src.getElementsByTagName("span");
-    for (let i = 0; i < divList.length; i++)
-    {
-        const element: HTMLElement = divList[i];
-        if (element.id === "mark")
-        {
-            return element;
-        }
-    }
-
-    return null;
+    MarkDiv.GetMarkSpanElement(document.getElementById(ownerId))?.Close();
 }
