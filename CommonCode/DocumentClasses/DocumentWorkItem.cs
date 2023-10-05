@@ -15,6 +15,7 @@ namespace CommonCode.DocumentClasses
 
         private readonly DocumentWorkItemList _subItemList = new();
         private readonly List<DocumentPullRequest> _pullRequestList = new();
+        private readonly string _assignedTo;
 
         public DocumentWorkItem(GitWorkItem workItem)
         {
@@ -22,6 +23,7 @@ namespace CommonCode.DocumentClasses
             _workItemType = workItem.Fields.WorkItemType;
             _state = workItem.Fields.State;
             _title = workItem.Fields.Title;
+            _assignedTo = workItem.Fields.AssignedTo.DisplayName;
             _html = workItem.Links.Html.Href;
         }
 
@@ -91,7 +93,9 @@ namespace CommonCode.DocumentClasses
         public string State => _state;
 
         public string Title => _title;
-        
+
+        public string AssignedTo => _assignedTo;
+
         public bool IsClosed => _state == "Closed";
 
         public bool IsInProgress => _state == "In Progress";

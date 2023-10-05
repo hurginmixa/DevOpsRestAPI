@@ -32,9 +32,9 @@ namespace ItemsReport
             textWriter.WriteLine("<thead>");
             textWriter.WriteLine("<tr>");
             textWriter.WriteLine("<th class='sticky-column, sticky-row'>Id</th>");
-            textWriter.WriteLine("<th class='sticky-column, sticky-row'>Type</th>");
-            textWriter.WriteLine("<th class='sticky-column, sticky-row'>State</th>");
             textWriter.WriteLine("<th class='sticky-column, sticky-row'>Title</th>");
+            textWriter.WriteLine("<th class='sticky-column, sticky-row'>State</th>");
+            textWriter.WriteLine("<th class='sticky-column, sticky-row'>Assign To</th>");
 
             foreach (string path in reportedPaths)
             {
@@ -136,17 +136,28 @@ namespace ItemsReport
                         lineShift += "&nbsp;&nbsp;";
                     }
 
-                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a></td>");
-                    textWriter.Write($"<td>{workItem.WorkItemType}</td>");
-                    textWriter.Write($"<td>{workItem.State}</td>");
+                    string subItemsCount = workItem.SubItems.Any() ? $"&nbsp;(&nbsp;{workItem.SubItems.Count()}&nbsp;)" : string.Empty;
+
+                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{subItemsCount}</td>");
+
+                    // ------------ workItemTitle
+
+                    Color folderColor = GetFolderColor(workItem);
+                    string folder = $"<span style='color: {ColorTranslator.ToHtml(folderColor)};'>&#128447;</span>&nbsp;";
 
                     string workItemTitle = workItem.Title;
                     if (workItem.IsClosed && pullRequestList.Length == 0)
                     {
                         workItemTitle = $"<S>{workItemTitle}</S>";
                     }
+                    string workItemText = $"{folder}<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItemTitle}";
 
-                    textWriter.Write($"<td>{workItemTitle}</td>");
+                    textWriter.Write($"<td>{workItemText}</td>");
+
+                    // ------------ state
+                    textWriter.Write($"<td>{workItem.State}</td>");
+
+                    textWriter.Write($"<td>{workItem.AssignedTo}</td>");
 
                     PrintPullRequestList(pullRequestList);
 
@@ -173,6 +184,24 @@ namespace ItemsReport
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+        }
+
+        private static Color GetFolderColor(IDocumentWorkItem workItem)
+        {
+
+            switch (workItem.WorkItemType)
+            {
+                case "Bug" : return Color.Red;
+                case "Task" : return Color.Yellow;
+                case "Task-Validation" : return Color.GreenYellow;
+                case "Feature" : return Color.BlueViolet;
+                case "Requirement" : return Color.DodgerBlue;
+                case "Issue" : return Color.DarkRed;
+
+                default: return Color.Black;
+            }
+
+            throw new System.NotImplementedException();
         }
 
         private static string GetScripts()
