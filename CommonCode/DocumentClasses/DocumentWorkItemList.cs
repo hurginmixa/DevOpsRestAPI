@@ -34,5 +34,43 @@ namespace CommonCode.DocumentClasses
         public IEnumerator<IDocumentWorkItem> GetEnumerator() => _list.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public void AddFromCache(DocumentWorkItemData[] cachedDataArray, int[] idsStillInCache)
+        {
+            HashSet<int> hashSet = new HashSet<int>(idsStillInCache);
+
+            AddFromCache(cachedDataArray.Where(d => hashSet.Contains(d.Id)).ToArray());
+        }
+
+        private void AddFromCache(DocumentWorkItemData[] cachedDataArray)
+        {
+            foreach (DocumentWorkItemData cacheData in cachedDataArray)
+            {
+                DocumentWorkItem workItem = ReadDocument(cacheData);
+
+                AddWorkItem(workItem);
+            }
+        }
+
+        private static DocumentWorkItem ReadDocument(DocumentWorkItemData cacheData)
+        {
+            DocumentWorkItem workItem = new DocumentWorkItem(cacheData);
+
+            foreach (DocumentWorkItemData subCacheData in cacheData.SubItemList)
+            {
+                IDocumentWorkItem document = ReadDocument(subCacheData);
+
+                workItem.SubItems.AddWorkItem(document);
+            }
+
+            foreach (DocumentPullRequestData pullRequestData in cacheData.PullRequestList)
+            {
+                DocumentPullRequest pullRequest = new DocumentPullRequest(pullRequestData);
+
+                workItem.AddPullRequest(pullRequest);
+            }
+
+            return workItem;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using CommonCode.DocumentClasses;
 
@@ -47,6 +48,15 @@ namespace CommonCode
             SearchLevel(workItemList);
 
             return hashSet;
+        }
+
+        public static void CombineIds(int[] ids, int[] oldIds, int[] cachedIds, out int [] idsToReading, out int [] idsStillInCache)
+        {
+            int[] refreshList = oldIds.Except(cachedIds).ToArray(); // список старых ID, которых нет в кеше, чтобы их перечитать
+
+            idsToReading = ids.Union(refreshList).ToArray(); // все новые ID и все ID для перечитки
+
+            idsStillInCache = cachedIds.Intersect(oldIds).Except(idsToReading).ToArray();
         }
     }
 }

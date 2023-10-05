@@ -13,6 +13,8 @@ namespace CommonCode.DocumentClasses.SerializeClasses
         public string Title { get; set; }
 
         public string Html { get; set; }
+        
+        public string AssignedTo { get; set; }
 
         public DocumentWorkItemData[] SubItemList { get; set; } = Array.Empty<DocumentWorkItemData>();
 

@@ -21,6 +21,15 @@ namespace CommonCode.DocumentClasses
             _createBy = pullRequest.CreatedBy.DisplayName;
         }
 
+        public DocumentPullRequest(DocumentPullRequestData cacheData)
+        {
+            _id = cacheData.Id;
+            _status = cacheData.Status;
+            _targetRefName = cacheData.TargetRefName;
+            _closeDate = cacheData.CloseDate;
+            _createBy = cacheData.CreateBy;
+        }
+
         public DocumentPullRequestData GetData()
         {
             DocumentPullRequestData requestData = new DocumentPullRequestData();

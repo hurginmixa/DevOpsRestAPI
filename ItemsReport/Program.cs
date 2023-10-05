@@ -21,51 +21,41 @@ namespace ItemsReport
             {
                 Config config = Config.GetConfig();
 
+                ICacheHandler cacheHandler = new CacheHandler(config: config);
+
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                ReadIds(config);
+                DocumentWorkItemData[] cachedData = cacheHandler.ReadFromCache();
+
+                Tools.CombineIds(ids: config.Ids, oldIds: config.OldIds, cachedIds: cachedData.Ids(), idsToReading: out int[] idsToReading, idsStillInCache: out int[] idsStillInCache);
 
                 DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
-                await PerformWorkItems(workItemNumbers: config.Ids, workItemList: workItemList, levelNumber: 1, config: config);
+                workItemList.AddFromCache(cachedData, idsStillInCache);
 
-                RemoveDuplicateItems(workItemList);
+                await PerformWorkItems(workItemNumbers: idsToReading, workItemList: workItemList, levelNumber: 1, config: config);
 
-                WriteLine($"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
+                RemoveDuplicateItems(workItemList: workItemList);
 
-                IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(it => it.GetFullPullRequestList().Any(pr => GetPredicate(pr.Request, config)));
+                WriteLine(value: $"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
 
-                PrinterHtml.Print(new DocumentWorkItemList(filteredList), config);
+                IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(predicate: it => it.GetFullPullRequestList().Any(predicate: pr => GetPredicate(pr: pr.Request, config: config)));
 
-                WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
+                PrinterHtml.Print(workItemList: new DocumentWorkItemList(list: filteredList), config: config);
 
-                CacheHandler.SaveToCache(workItemList, config);
+                WriteLine(value: $"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
+
+                cacheHandler.SaveToCache(workItemList: workItemList);
 
                 stopwatch.Stop();
             }
             catch (Exception e)
             {
-                WriteLine(e);
+                WriteLine(value: e);
                 Console.ReadKey();
             }
 		}
-
-        private static void ReadIds(Config config)
-        {
-            DocumentWorkItemData[] itemDatas = CacheHandler.ReadFromCache(config);
-
-            int[] allIds = config.Ids.Union(config.OldIds).ToArray();
-
-            HashSet<int> cachedIds = allIds.Intersect(itemDatas.Select(d => d.Id)).ToHashSet();
-
-            itemDatas.Where(d => cachedIds.Contains(d.Id));
-        }
-
-        private static void CombineIds(int[] ids, int[] oldIds, int[] cacheIds)
-        {
-
-        }
 
         private static bool GetPredicate(DocumentPullRequest pr, Config config)
         {
