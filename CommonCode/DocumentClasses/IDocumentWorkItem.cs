@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CommonCode.DocumentClasses.SerializeClasses;
 
 namespace CommonCode.DocumentClasses
 {
@@ -13,6 +14,8 @@ namespace CommonCode.DocumentClasses
         bool HasActiveSubItems { get; }
 
         IEnumerable<DocumentPullRequest> PullRequestList { get; }
+
+        DocumentWorkItemData GetData();
         
         string Html { get; }
         
