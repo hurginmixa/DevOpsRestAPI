@@ -208,7 +208,6 @@ namespace ItemsReport
         {
             return @"
 <script src='Scripts/FirstScript.js'></script>
-<script src='Scripts/MarkSpan.js'></script>
 " ;
         }
 

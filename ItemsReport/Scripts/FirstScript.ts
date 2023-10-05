@@ -1,4 +1,51 @@
-﻿import { MarkDiv } from "./MarkSpan";
+﻿class MarkSpanObject
+{
+    private openItem = "\u25e2";
+    private closeItem = "\u25b7";
+    
+    private _markSpanElement : HTMLSpanElement;
+
+    constructor(markSpanElement : HTMLSpanElement)
+    {
+        this._markSpanElement = markSpanElement;
+    }
+
+    get IsClose()
+    {
+        return this._markSpanElement.innerText === this.closeItem;
+    }
+
+    Open()
+    {
+        this._markSpanElement.innerText = this.openItem;
+    }
+
+    Close()
+    {
+        this._markSpanElement.innerText = this.closeItem;
+    }
+
+    static GetMarkSpanElement(src: HTMLElement | null): (MarkSpanObject | null)    
+    {
+        if (src === null)
+        {
+            return null;
+        }
+
+        let spanList: HTMLCollectionOf<HTMLSpanElement> = src.getElementsByTagName("span");
+        for (let i = 0; i < spanList.length; i++)
+        {
+            const element: HTMLElement = spanList[i];
+            if (element.id === "mark")
+            {
+                return new MarkSpanObject(element);
+            }
+        }
+
+        return null;
+    }
+
+}
 
 function OnCollapseAll()
 {
@@ -17,7 +64,7 @@ function OnMarkClick(markSpanElement: HTMLElement, ownerId : string) : boolean
         return true;
     }
 
-    const markSpan : MarkDiv = new MarkDiv(markSpanElement);
+    const markSpan : MarkSpanObject = new MarkSpanObject(markSpanElement);
 
     if (markSpan.IsClose)
     {
@@ -60,5 +107,5 @@ function CloseAllChilds(ownerId: string)
         child.style.display = "none";
     }
 
-    MarkDiv.GetMarkSpanElement(document.getElementById(ownerId))?.Close();
+    MarkSpanObject.GetMarkSpanElement(document.getElementById(ownerId))?.Close();
 }
