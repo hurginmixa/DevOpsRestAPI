@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using CommonCode;
 using CommonCode.DocumentClasses;
+using CommonCode.DocumentClasses.SerializeClasses;
 using CommonCode.GitClasses;
-using ItemsReport;
 using static System.Console;
 
-namespace Test01
+namespace ItemsReport
 {
     public static class Program
     {
@@ -25,31 +21,41 @@ namespace Test01
             {
                 Config config = Config.GetConfig();
 
+                ICacheHandler cacheHandler = new CacheHandler(config: config);
+
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
+                DocumentWorkItemData[] cachedData = cacheHandler.ReadFromCache();
+
+                Tools.CombineIds(ids: config.Ids, oldIds: config.OldIds, cachedIds: cachedData.Ids(), idsToReading: out int[] idsToReading, idsStillInCache: out int[] idsStillInCache);
+
                 DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
-                await PerformWorkItems(workItemNumbers: config.Ids, workItemList: workItemList, levelNumber: 1, config: config);
+                workItemList.AddFromCache(cachedData, idsStillInCache);
 
-                RemoveDuplicateItems(workItemList);
+                await PerformWorkItems(workItemNumbers: idsToReading, workItemList: workItemList, levelNumber: 1, config: config);
 
-                WriteLine($"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
+                RemoveDuplicateItems(workItemList: workItemList);
 
-                IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(it => it.GetFullPullRequestList().Any(pr => GetPredicate(pr.Request, config)));
+                WriteLine(value: $"Printing, {stopwatch.Elapsed.TotalMilliseconds}");
 
-                PrinterHtml.Print(new DocumentWorkItemList(filteredList), config);
+                IEnumerable<IDocumentWorkItem> filteredList = !config.Filter.IsFiltered ? workItemList : workItemList.Where(predicate: it => it.GetFullPullRequestList().Any(predicate: pr => GetPredicate(pr: pr.Request, config: config)));
 
-                WriteLine($"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
+                PrinterHtml.Print(workItemList: new DocumentWorkItemList(list: filteredList), config: config);
+
+                WriteLine(value: $"Complete, {stopwatch.Elapsed.TotalMilliseconds}");
+
+                cacheHandler.SaveToCache(workItemList: workItemList);
 
                 stopwatch.Stop();
             }
             catch (Exception e)
             {
-                WriteLine(e);
+                WriteLine(value: e);
                 Console.ReadKey();
             }
-        }
+		}
 
         private static bool GetPredicate(DocumentPullRequest pr, Config config)
         {
@@ -154,6 +160,8 @@ namespace Test01
                 Task<string>[] pullRequestTasks = pullRequestList.OrderBy(rr => rr)
                     .Select(pullRequestId => HttpTools.GetPullRequestById(pullRequestId, config.Token))
                     .ToArray();
+
+                Task.WaitAll(pullRequestTasks.Cast<Task>().ToArray());
 
                 foreach (Task<string> pullRequestTask in pullRequestTasks)
                 {

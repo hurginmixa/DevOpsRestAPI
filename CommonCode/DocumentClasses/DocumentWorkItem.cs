@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CommonCode.DocumentClasses.SerializeClasses;
 using CommonCode.GitClasses;
 
 namespace CommonCode.DocumentClasses
@@ -26,6 +27,34 @@ namespace CommonCode.DocumentClasses
             _html = workItem.Links.Html.Href;
         }
 
+        public DocumentWorkItem(DocumentWorkItemData workItem)
+        {
+            _id = workItem.Id;
+            _workItemType = workItem.WorkItemType;
+            _state = workItem.State;
+            _title = workItem.Title;
+            _assignedTo = workItem.AssignedTo;
+            _html = workItem.Html;
+        }
+
+        public DocumentWorkItemData GetData()
+        {
+            DocumentWorkItemData workItemData = new DocumentWorkItemData();
+
+            workItemData.Id = _id;
+            workItemData.WorkItemType = _workItemType;
+            workItemData.State = _state;
+            workItemData.Title = _title;
+            workItemData.Html = _html;
+            workItemData.AssignedTo = _assignedTo;
+
+            workItemData.SubItemList = _subItemList.GetData();
+
+            workItemData.PullRequestList = _pullRequestList.Select(k => k.GetData()).ToArray();
+
+            return workItemData;
+        }
+
         public IDocumentWorkItemList SubItems => _subItemList;
 
         public IEnumerable<DocumentPullRequest> PullRequestList => _pullRequestList;
@@ -34,7 +63,7 @@ namespace CommonCode.DocumentClasses
         {
             HashSet<(DocumentPullRequest Request, bool IsOwner)> pullRequests = new();
 
-            foreach (DocumentPullRequest pullRequest in PullRequestList)
+            foreach (DocumentPullRequest pullRequest in _pullRequestList)
             {
                 pullRequests.Add((Request: pullRequest, IsOwner: true));
             }
