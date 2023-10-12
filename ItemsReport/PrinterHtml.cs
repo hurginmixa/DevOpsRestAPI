@@ -188,7 +188,6 @@ namespace ItemsReport
 
         private static Color GetFolderColor(IDocumentWorkItem workItem)
         {
-
             switch (workItem.WorkItemType)
             {
                 case "Bug" : return Color.Red;

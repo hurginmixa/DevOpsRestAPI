@@ -1,31 +1,35 @@
-﻿class MarkSpanObject
-{
-    private openItem = "\u25e2";
-    private closeItem = "\u25b7";
-    
-    private _markSpanElement : HTMLSpanElement;
+﻿//
+// class MarkSpanObject
+//
 
-    constructor(markSpanElement : HTMLSpanElement)
+class MarkSpanObject
+{
+    private openItem : string = "\u25e2";
+    private closeItem : string = "\u25b7";
+    
+    private readonly _markSpanElement : HTMLSpanElement;
+
+    public constructor(markSpanElement : HTMLSpanElement)
     {
         this._markSpanElement = markSpanElement;
     }
 
-    get IsClose()
+    public get IsClose()
     {
         return this._markSpanElement.innerText === this.closeItem;
     }
 
-    Open()
+    public Open()
     {
         this._markSpanElement.innerText = this.openItem;
     }
 
-    Close()
+    public Close()
     {
         this._markSpanElement.innerText = this.closeItem;
     }
 
-    static GetMarkSpanElement(src: HTMLElement | null): (MarkSpanObject | null)    
+    public static GetMarkSpanElement(src: HTMLElement | null): (MarkSpanObject | null)    
     {
         if (src === null)
         {
@@ -46,6 +50,86 @@
     }
 }
 
+//
+// class LineMarkerClass
+//
+
+class LineMarkerClass
+{
+    private readonly rowElement: HTMLTableRowElement;
+    private readonly backgroundColor: string;
+    private readonly textColor: string;
+    private readonly anchorColor: string;
+    private readonly itemId : string;
+
+    public constructor(rowElement: HTMLTableRowElement)
+    {
+        this.rowElement = rowElement;
+        this.backgroundColor =  this.rowElement.style.backgroundColor;
+        this.textColor = this.rowElement.style.color;
+
+        this.rowElement.style.backgroundColor = "#707b7c";
+        this.rowElement.style.color = "#fdfefe";
+
+        this.itemId = rowElement.id;
+
+        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this.rowElement.getElementsByTagName("a");
+        if (anchorList.length > 0)
+        {
+            this.anchorColor = anchorList[0].style.color;
+
+            for (let i = 0; i < anchorList.length; i++)
+            {
+                anchorList[i].style.color = "#fdfefe";
+            }
+        }
+    }
+
+    public get ItemId() : string
+    {
+        return this.itemId;
+    }
+
+    public Hide() : void
+    {
+        this.rowElement.style.backgroundColor = this.backgroundColor;
+        this.rowElement.style.color = this.textColor;
+
+        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this.rowElement.getElementsByTagName("a");
+        if (anchorList.length > 0)
+        {
+            for (let i = 0; i < anchorList.length; i++)
+            {
+                anchorList[i].style.color = this.anchorColor;
+            }
+        }
+    }
+}
+
+let LineMarker: LineMarkerClass | null = null;
+
+function onDocumentClick(ev: Event)
+{
+    if (!(ev.target instanceof HTMLTableCellElement)) 
+    {
+        return;
+    }
+
+    let oldIdNumber : string = LineMarker?.ItemId ?? "-1";
+    LineMarker?.Hide();
+    LineMarker = null;
+
+    const cellElement: HTMLTableCellElement = ev.target as HTMLTableCellElement;
+    const rowElement: HTMLTableRowElement = cellElement.parentElement as HTMLTableRowElement;
+
+    if (oldIdNumber === rowElement.id)
+    {
+        return;
+    }
+
+    LineMarker = new LineMarkerClass(rowElement);
+}
+
 function OnCollapseAll()
 {
     let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_0`);
@@ -56,23 +140,23 @@ function OnCollapseAll()
     }
 }
 
-function OnMarkClick(markSpanElement: HTMLElement, ownerId : string) : boolean
+function OnMarkClick(markSpanElement: HTMLElement, ownerId: string) : boolean
 {
     if (!(markSpanElement instanceof HTMLSpanElement))
     {
         return true;
     }
 
-    const markSpan : MarkSpanObject = new MarkSpanObject(markSpanElement);
+    let markSpan: MarkSpanObject = new MarkSpanObject(markSpanElement);
 
     if (markSpan.IsClose)
     {
         markSpan.Open();
 
-        let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_${ownerId}`);
-        for (let i = 0; i < childList.length; i++)
+        let subItemList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_${ownerId}`);
+        for (let i = 0; i < subItemList.length; i++)
         {
-            const element: HTMLElement = <HTMLElement>(childList[i]);
+            const element: HTMLElement = <HTMLElement>(subItemList[i]);
             element.style.display = "";
         }
 
@@ -100,78 +184,13 @@ function CloseAllChilds(ownerId: string)
 
     for (let i = 0; i < childList.length; i++)
     {
-        const child: HTMLElement = <HTMLElement>(childList[i]);
+        let child: HTMLElement = <HTMLElement>(childList[i]);
         CloseAllChilds(child.id);
 
         child.style.display = "none";
     }
 
     MarkSpanObject.GetMarkSpanElement(document.getElementById(ownerId))?.Close();
-}
-
-class LineMarkerClass
-{
-    private _rowElement: HTMLTableRowElement;
-    private _backgroundColor: string;
-    private _color: string;
-    private _anchorColor: string;
-
-    private  constructor(rowElement: HTMLTableRowElement)
-    {
-        this._rowElement = rowElement;
-        this._backgroundColor =  this._rowElement.style.backgroundColor;
-        this._color = this._rowElement.style.color;
-
-        this._rowElement.style.backgroundColor = "#707b7c";
-        this._rowElement.style.color = "#fdfefe";
-
-        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this._rowElement.getElementsByTagName("a");
-        if (anchorList.length > 0)
-        {
-            this._anchorColor = anchorList[0].style.color;
-
-            for (let i = 0; i < anchorList.length; i++)
-            {
-                anchorList[i].style.color = "#fdfefe";
-            }
-        }
-    }
-
-    public Hide() : void
-    {
-        this._rowElement.style.backgroundColor = this._backgroundColor;
-        this._rowElement.style.color = this._color;
-
-        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this._rowElement.getElementsByTagName("a");
-        if (anchorList.length > 0)
-        {
-            for (let i = 0; i < anchorList.length; i++)
-            {
-                anchorList[i].style.color = this._anchorColor;
-            }
-        }
-    }
-
-    public static GetLineMarker(target: EventTarget) : LineMarkerClass | null
-    {
-        if (!(target instanceof HTMLTableCellElement)) {
-            return null;
-        }
-
-        const cellElement: HTMLTableCellElement = target as HTMLTableCellElement;
-        const rowElement: HTMLTableRowElement = cellElement.parentElement as HTMLTableRowElement;
-
-        return new LineMarkerClass(rowElement);
-    }
-}
-
-let LineMarker: LineMarkerClass = null;
-
-function onDocumentClick(ev: Event)
-{
-    LineMarker?.Hide();
-
-    LineMarker = LineMarkerClass.GetLineMarker(ev.target);
 }
 
 document.onclick = onDocumentClick;
