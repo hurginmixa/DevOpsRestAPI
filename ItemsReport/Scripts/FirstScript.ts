@@ -115,14 +115,20 @@ function onDocumentClick(ev: Event)
         return;
     }
 
-    let oldIdNumber : string = LineMarker?.ItemId ?? "-1";
-    LineMarker?.Hide();
-    LineMarker = null;
-
     const cellElement: HTMLTableCellElement = ev.target as HTMLTableCellElement;
     const rowElement: HTMLTableRowElement = cellElement.parentElement as HTMLTableRowElement;
 
-    if (oldIdNumber === rowElement.id)
+    let currentId : number = +rowElement.id;
+    if (currentId <= 0)
+    {
+        return;
+    }
+
+    let oldIdNumber : number = +(LineMarker?.ItemId ?? "-1");
+    LineMarker?.Hide();
+    LineMarker = null;
+
+    if (oldIdNumber === currentId)
     {
         return;
     }
