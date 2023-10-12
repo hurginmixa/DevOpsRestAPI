@@ -44,7 +44,6 @@
 
         return null;
     }
-
 }
 
 function OnCollapseAll()
@@ -99,7 +98,7 @@ function CloseAllChilds(ownerId: string)
         return;
     }
 
-    for (var i = 0; i < childList.length; i++)
+    for (let i = 0; i < childList.length; i++)
     {
         const child: HTMLElement = <HTMLElement>(childList[i]);
         CloseAllChilds(child.id);
@@ -109,3 +108,70 @@ function CloseAllChilds(ownerId: string)
 
     MarkSpanObject.GetMarkSpanElement(document.getElementById(ownerId))?.Close();
 }
+
+class LineMarkerClass
+{
+    private _rowElement: HTMLTableRowElement;
+    private _backgroundColor: string;
+    private _color: string;
+    private _anchorColor: string;
+
+    private  constructor(rowElement: HTMLTableRowElement)
+    {
+        this._rowElement = rowElement;
+        this._backgroundColor =  this._rowElement.style.backgroundColor;
+        this._color = this._rowElement.style.color;
+
+        this._rowElement.style.backgroundColor = "#707b7c";
+        this._rowElement.style.color = "#fdfefe";
+
+        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this._rowElement.getElementsByTagName("a");
+        if (anchorList.length > 0)
+        {
+            this._anchorColor = anchorList[0].style.color;
+
+            for (let i = 0; i < anchorList.length; i++)
+            {
+                anchorList[i].style.color = "#fdfefe";
+            }
+        }
+    }
+
+    public Hide() : void
+    {
+        this._rowElement.style.backgroundColor = this._backgroundColor;
+        this._rowElement.style.color = this._color;
+
+        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this._rowElement.getElementsByTagName("a");
+        if (anchorList.length > 0)
+        {
+            for (let i = 0; i < anchorList.length; i++)
+            {
+                anchorList[i].style.color = this._anchorColor;
+            }
+        }
+    }
+
+    public static GetLineMarker(target: EventTarget) : LineMarkerClass | null
+    {
+        if (!(target instanceof HTMLTableCellElement)) {
+            return null;
+        }
+
+        const cellElement: HTMLTableCellElement = target as HTMLTableCellElement;
+        const rowElement: HTMLTableRowElement = cellElement.parentElement as HTMLTableRowElement;
+
+        return new LineMarkerClass(rowElement);
+    }
+}
+
+let LineMarker: LineMarkerClass = null;
+
+function onDocumentClick(ev: Event)
+{
+    LineMarker?.Hide();
+
+    LineMarker = LineMarkerClass.GetLineMarker(ev.target);
+}
+
+document.onclick = onDocumentClick;
