@@ -6,6 +6,9 @@
     <RootNamespace>ItemsReport</RootNamespace>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <TypeScriptOutDir>$(MSBuildProjectDirectory)\bin\Debug\$(TargetFramework.ToLowerInvariant())\Scripts</TypeScriptOutDir>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.2.2">
       <PrivateAssets>all</PrivateAssets>
@@ -22,17 +25,8 @@
     <None Update="PAT.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\FirstScript.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Scripts\FirstScript.js.map">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <TypeScriptCompile Update="Scripts\FirstScript.ts">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </TypeScriptCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="bin\Debug\net5.0\Scripts\" />
   </ItemGroup>
 </Project>
