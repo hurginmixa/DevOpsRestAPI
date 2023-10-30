@@ -17,6 +17,5 @@ copy %srcFolder%ItemsReport.pdb %targetFolder%
 copy %srcFolder%PAT.txt %targetFolder%
 
 copy %srcScriptsFolder%FirstScript.js %targetScriptsFolder%
-copy %srcScriptsFolder%FirstScript.js.map %targetScriptsFolder%
 
 pause
