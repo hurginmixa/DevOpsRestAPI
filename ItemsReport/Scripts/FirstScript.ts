@@ -56,27 +56,24 @@ class MarkSpanObject
 
 class LineMarkerClass
 {
-    private readonly rowElement: HTMLTableRowElement;
-    private readonly backgroundColor: string;
-    private readonly textColor: string;
-    private readonly anchorColor: string;
-    private readonly itemId : string;
+    private readonly savedRowElement: HTMLTableRowElement;
+    private readonly savedBackgroundColor: string;
+    private readonly savedTextColor: string;
+    private readonly savedAnchorColor: string;
 
     public constructor(rowElement: HTMLTableRowElement)
     {
-        this.rowElement = rowElement;
-        this.backgroundColor =  this.rowElement.style.backgroundColor;
-        this.textColor = this.rowElement.style.color;
+        this.savedRowElement = rowElement;
+        this.savedBackgroundColor =  this.savedRowElement.style.backgroundColor;
+        this.savedTextColor = this.savedRowElement.style.color;
 
-        this.rowElement.style.backgroundColor = "#707b7c";
-        this.rowElement.style.color = "#fdfefe";
+        this.savedRowElement.style.backgroundColor = "#707b7c";
+        this.savedRowElement.style.color = "#fdfefe";
 
-        this.itemId = rowElement.id;
-
-        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this.rowElement.getElementsByTagName("a");
+        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this.savedRowElement.getElementsByTagName("a");
         if (anchorList.length > 0)
         {
-            this.anchorColor = anchorList[0].style.color;
+            this.savedAnchorColor = anchorList[0].style.color;
 
             for (let i = 0; i < anchorList.length; i++)
             {
@@ -85,22 +82,22 @@ class LineMarkerClass
         }
     }
 
-    public get ItemId() : string
+    public get ItemId() : number
     {
-        return this.itemId;
+        return +this.savedRowElement.id;
     }
 
     public Hide() : void
     {
-        this.rowElement.style.backgroundColor = this.backgroundColor;
-        this.rowElement.style.color = this.textColor;
+        this.savedRowElement.style.backgroundColor = this.savedBackgroundColor;
+        this.savedRowElement.style.color = this.savedTextColor;
 
-        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this.rowElement.getElementsByTagName("a");
+        let anchorList : HTMLCollectionOf<HTMLAnchorElement> = this.savedRowElement.getElementsByTagName("a");
         if (anchorList.length > 0)
         {
             for (let i = 0; i < anchorList.length; i++)
             {
-                anchorList[i].style.color = this.anchorColor;
+                anchorList[i].style.color = this.savedAnchorColor;
             }
         }
     }
@@ -124,7 +121,7 @@ function onDocumentClick(ev: Event)
         return;
     }
 
-    let oldIdNumber : number = +(LineMarker?.ItemId ?? "-1");
+    let oldIdNumber : number = (LineMarker?.ItemId ?? -1);
     LineMarker?.Hide();
     LineMarker = null;
 
@@ -134,6 +131,8 @@ function onDocumentClick(ev: Event)
     }
 
     LineMarker = new LineMarkerClass(rowElement);
+
+    ev.cancelBubble = true;
 }
 
 function OnCollapseAll()
@@ -198,5 +197,3 @@ function CloseAllChilds(ownerId: string)
 
     MarkSpanObject.GetMarkSpanElement(document.getElementById(ownerId))?.Close();
 }
-
-document.onclick = onDocumentClick;
