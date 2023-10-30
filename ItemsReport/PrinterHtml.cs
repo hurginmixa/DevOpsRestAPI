@@ -23,7 +23,7 @@ namespace ItemsReport
             textWriter.WriteLine(GetStyles());
             textWriter.WriteLine(GetScripts());
             textWriter.WriteLine("</head>");
-            textWriter.WriteLine("<body>");
+            textWriter.WriteLine("<body ondblclick='onDocumentClick(event)'>");
             textWriter.WriteLine("&nbsp;&nbsp;&nbsp;<button onclick='OnCollapseAll()' class='favorite styled'>Collapse All</button><br /><br />");
             textWriter.WriteLine("<table>");
 
