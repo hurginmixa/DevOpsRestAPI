@@ -37,15 +37,22 @@ namespace CommonCode
 
         private static async Task<string> GetStringByUri(string uri, string personalAccessToken)
         {
-            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{personalAccessToken}"));
-            using var httpClient = new HttpClient();
+            try
+            {
+                var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{personalAccessToken}"));
+                using var httpClient = new HttpClient();
 
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
 
-            HttpResponseMessage response = await httpClient.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await httpClient.GetAsync(uri);
+                response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsStringAsync();
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException e)
+            {
+                throw new Exception($"Exception for {uri} arrived", e);
+            }
         }
 
         private static async Task<string> PostStringByUri(string uri, string json, string personalAccessToken)
