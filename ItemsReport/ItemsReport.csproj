@@ -25,14 +25,27 @@
     <None Update="Scripts\FirstScript.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Scripts\LineMarker.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Scripts\MarkSpanObject.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <TypeScriptCompile Update="Scripts\FirstScript.ts">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </TypeScriptCompile>
+    <TypeScriptCompile Update="Scripts\LineMarker.ts">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </TypeScriptCompile>
+    <TypeScriptCompile Update="Scripts\MarkSpanObject.ts">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </TypeScriptCompile>
   </ItemGroup>
-  <PropertyGroup>
-    <TypeScriptModule>commonjs</TypeScriptModule>
+  <!--<PropertyGroup>
     <TypeScriptSourceMap>false</TypeScriptSourceMap>
-  </PropertyGroup>
+    <TypeScriptOutFile>Scripts\FirstScript.js</TypeScriptOutFile>
+    <TypeScriptModule>System</TypeScriptModule>
+  </PropertyGroup> -->
   <ItemGroup>
     <Folder Include="bin\Debug\net5.0\Scripts\" />
   </ItemGroup>
