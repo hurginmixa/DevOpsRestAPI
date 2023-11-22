@@ -86,7 +86,7 @@ namespace ItemsReport
 
             #endregion
 
-            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.Cornsilk, Color.DarkGray };
+            Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.DarkSeaGreen, Color.LightPink };
             int colorIndex = -1;
 
             #region void StartLevelsReporting(IDocumentWorkItemList oneLevelItemList)
@@ -206,6 +206,8 @@ namespace ItemsReport
         private static string GetScripts()
         {
             return @"
+<script src='Scripts/MarkSpanObject.js'></script>
+<script src='Scripts/LineMarker.js'></script>
 <script src='Scripts/FirstScript.js'></script>
 " ;
         }

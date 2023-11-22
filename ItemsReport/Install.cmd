@@ -16,6 +16,8 @@ copy %srcFolder%CommonCode.pdb %targetFolder%
 copy %srcFolder%ItemsReport.pdb %targetFolder%
 copy %srcFolder%PAT.txt %targetFolder%
 
+copy %srcScriptsFolder%LineMarker.js %targetScriptsFolder%
+copy %srcScriptsFolder%MarkSpanObject.js %targetScriptsFolder%
 copy %srcScriptsFolder%FirstScript.js %targetScriptsFolder%
 
 pause
