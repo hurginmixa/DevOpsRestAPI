@@ -19,33 +19,26 @@
     <None Update="Config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="ItemReportScript.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="PAT.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\FirstScript.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Scripts\LineMarker.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Scripts\MarkSpanObject.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <TypeScriptCompile Update="Scripts\FirstScript.ts">
+    <TypeScriptCompile Update="Scripts\FolderElementClass.ts">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </TypeScriptCompile>
-    <TypeScriptCompile Update="Scripts\LineMarker.ts">
+    <TypeScriptCompile Update="Scripts\LineMarkerClass.ts">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </TypeScriptCompile>
-    <TypeScriptCompile Update="Scripts\MarkSpanObject.ts">
+    <TypeScriptCompile Update="Scripts\MainScript.ts">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </TypeScriptCompile>
   </ItemGroup>
-  <!--<PropertyGroup>
+  <PropertyGroup>
     <TypeScriptSourceMap>false</TypeScriptSourceMap>
-    <TypeScriptOutFile>Scripts\FirstScript.js</TypeScriptOutFile>
-    <TypeScriptModule>System</TypeScriptModule>
-  </PropertyGroup> -->
+    <TypeScriptOutFile>ItemReportScript.js</TypeScriptOutFile>
+  </PropertyGroup>
   <ItemGroup>
     <Folder Include="bin\Debug\net5.0\Scripts\" />
   </ItemGroup>

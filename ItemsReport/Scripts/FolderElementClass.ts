@@ -1,8 +1,8 @@
 ﻿//
-// class MarkSpanObject
+// class FolderElementClass
 //
 
-class MarkSpanObject
+class FolderElementClass
 {
     private openItem : string = "\u25e2";
     private closeItem : string = "\u25b7";
@@ -29,7 +29,7 @@ class MarkSpanObject
         this._markSpanElement.innerText = this.closeItem;
     }
 
-    public static GetMarkSpanElement(src: HTMLElement | null): (MarkSpanObject | null)    
+    public static GetElement(src: HTMLElement | null): (FolderElementClass | null)    
     {
         if (src === null)
         {
@@ -42,7 +42,7 @@ class MarkSpanObject
             const element: HTMLElement = spanList[i];
             if (element.id === "mark")
             {
-                return new MarkSpanObject(element);
+                return new FolderElementClass(element);
             }
         }
 

@@ -1,7 +1,5 @@
-﻿
-/// <reference path="MarkSpanObject.ts" />
-/// <reference path="LineMarker.ts" />
-
+﻿/// <reference path="FolderElementClass.ts" />
+/// <reference path="LineMarkerClass.ts" />
 
 let LineMarker: LineMarkerClass | null = null;
 
@@ -23,14 +21,8 @@ function onDocumentClick(ev: Event)
 
     let oldIdNumber : number = (LineMarker?.ItemId ?? -1);
     LineMarker?.Hide();
-    LineMarker = null;
 
-    if (oldIdNumber === currentId)
-    {
-        return;
-    }
-
-    LineMarker = new LineMarkerClass(rowElement);
+    LineMarker = oldIdNumber === currentId ? null : new LineMarkerClass(rowElement);
 
     ev.cancelBubble = true;
 }
@@ -52,7 +44,7 @@ function OnMarkClick(markSpanElement: HTMLElement, ownerId: string) : boolean
         return true;
     }
 
-    let markSpan: MarkSpanObject = new MarkSpanObject(markSpanElement);
+    let markSpan: FolderElementClass = new FolderElementClass(markSpanElement);
 
     if (markSpan.IsClose)
     {
@@ -95,5 +87,6 @@ function CloseAllChilds(ownerId: string)
         child.style.display = "none";
     }
 
-    MarkSpanObject.GetMarkSpanElement(document.getElementById(ownerId))?.Close();
+    let folderElement = FolderElementClass.GetElement(document.getElementById(ownerId));
+    folderElement?.Close();
 }

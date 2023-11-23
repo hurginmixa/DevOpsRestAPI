@@ -1,3 +1,4 @@
 PAT.txt
-Scripts/*.js
-Scripts/*.js.map
+
+*.js
+*.js.map

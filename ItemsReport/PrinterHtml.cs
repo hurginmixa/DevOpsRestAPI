@@ -206,9 +206,7 @@ namespace ItemsReport
         private static string GetScripts()
         {
             return @"
-<script src='Scripts/MarkSpanObject.js'></script>
-<script src='Scripts/LineMarker.js'></script>
-<script src='Scripts/FirstScript.js'></script>
+<script src='ItemReportScript.js'></script>
 " ;
         }
 
