@@ -33,7 +33,7 @@ function OnCollapseAll()
     for (let i = 0; i < childList.length; i++)
     {
         const element: HTMLElement = <HTMLElement>(childList[i]);
-        CloseAllChilds(element.id);
+        FolderElementClass.CloseAllChilds(element.id);
     }
 }
 
@@ -62,31 +62,10 @@ function OnMarkClick(markSpanElement: HTMLElement, ownerId: string) : boolean
 
     if (!markSpan.IsClose)
     {
-        CloseAllChilds(ownerId);
+        FolderElementClass.CloseAllChilds(ownerId);
 
         return false;
     }
 
     return true;
-}
-
-function CloseAllChilds(ownerId: string)
-{
-    let childList: HTMLCollectionOf<Element> = document.getElementsByClassName(`childOf_${ownerId}`);
-
-    if (childList.length === 0)
-    {
-        return;
-    }
-
-    for (let i = 0; i < childList.length; i++)
-    {
-        let child: HTMLElement = <HTMLElement>(childList[i]);
-        CloseAllChilds(child.id);
-
-        child.style.display = "none";
-    }
-
-    let folderElement = FolderElementClass.GetElement(document.getElementById(ownerId));
-    folderElement?.Close();
 }

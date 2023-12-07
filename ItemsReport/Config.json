@@ -4,17 +4,19 @@
 
     40044, 39309, 36757, 36514, 38280, 31764, 34112, 39244, 39926, 37442, 31358, 39031, 40583, 39852, 40721, 40745, 34625, 35781, 39862, 39926, 39967, 40044, 40144, 40745, 40967
   ],
-  
+
   "Ids": [
     38324, 41084, 44386
   ],
 
   "Filter": {
     "SelectedBranchPaths": [ "ver/10.0/dev" ],
-    "StartDate" : "2023-03-10" 
+    "StartDate": "2023-03-10"
   },
 
   "OutputFile": "Report.html",
-  
-  "CacheDataFile": "CacheData.json"
+
+  "CacheDataFile": "CacheData.json",
+
+  "HTMLTitle": "Title"
 }

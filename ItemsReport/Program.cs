@@ -15,11 +15,13 @@ namespace ItemsReport
 {
     public static class Program
     {
-        static async Task Main()
+        static async Task Main(string[] args)
         {
             try
             {
-                Config config = Config.GetConfig();
+                string configFileName = args.Length >= 1 ? args[0] : "Config.json";
+
+                Config config = Config.GetConfig(configFileName);
 
                 ICacheHandler cacheHandler = new CacheHandler(config: config);
 

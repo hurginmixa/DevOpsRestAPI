@@ -15,17 +15,16 @@ namespace ItemsReport
 
     public class CacheHandler : ICacheHandler
     {
-        private readonly Config _config;
+        private readonly string _cacheDataFilePath;
 
         public CacheHandler(Config config)
         {
-            _config = config;
+            _cacheDataFilePath = Path.GetFullPath(config.CacheDataFile);
         }
 
         public DocumentWorkItemData[] ReadFromCache()
         {
-            string cacheDataFilePath = PPath.GetExeDirectory() / _config.CacheDataFile;
-            string json = File.Exists(cacheDataFilePath) ? File.ReadAllText(cacheDataFilePath) : "[]";
+            string json = File.Exists(_cacheDataFilePath) ? File.ReadAllText(_cacheDataFilePath) : "[]";
             DocumentWorkItemData[] itemDatas = JsonSerializer.Deserialize<DocumentWorkItemData[]>(json);
             return itemDatas;
         }
@@ -36,7 +35,7 @@ namespace ItemsReport
 
             string json = CustJsonSerializer.FormatJson(JsonSerializer.Serialize(data));
 
-            File.WriteAllText(PPath.GetExeDirectory() / _config.CacheDataFile, json);
+            File.WriteAllText(_cacheDataFilePath, json);
         }
     }
 }

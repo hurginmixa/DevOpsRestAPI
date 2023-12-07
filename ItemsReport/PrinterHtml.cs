@@ -13,15 +13,18 @@ namespace ItemsReport
     {
         public static void Print(IDocumentWorkItemList workItemList, Config config)
         {
-            using Stream textStream = new FileStream(PPath.GetExeDirectory() / config.OutputFile, FileMode.Create);
+            string outputFileName = Path.GetFullPath(config.OutputFile);
+
+            using Stream textStream = new FileStream(outputFileName, FileMode.Create);
             using TextWriter textWriter = new StreamWriter(textStream, Encoding.UTF8);
 
             textWriter.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
             textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
             textWriter.WriteLine("<html>");
             textWriter.WriteLine("<head>");
+            textWriter.WriteLine($"<title>{config.HTMLTitle}</title>");
             textWriter.WriteLine(GetStyles());
-            textWriter.WriteLine(GetScripts());
+            textWriter.WriteLine(GetScripts(outputFileName));
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body ondblclick='onDocumentClick(event)'>");
             textWriter.WriteLine("&nbsp;&nbsp;&nbsp;<button onclick='OnCollapseAll()' class='favorite styled'>Collapse All</button><br /><br />");
@@ -203,10 +206,20 @@ namespace ItemsReport
             throw new System.NotImplementedException();
         }
 
-        private static string GetScripts()
+        private static string GetScripts(string outputFileName)
         {
-            return @"
-<script src='ItemReportScript.js'></script>
+            PPath directoryName = Path.GetDirectoryName(outputFileName);
+
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(outputFileName);
+
+            const string baseScriptFileName = "ItemReportScript.js";
+            
+            string scriptFileName = $"{fileNameWithoutExtension}.js";
+
+            File.Copy(PPath.GetExeDirectory() / baseScriptFileName, directoryName / scriptFileName, true);
+
+            return @$"
+<script src='{scriptFileName}'></script>
 " ;
         }
 
@@ -214,8 +227,7 @@ namespace ItemsReport
         {
             string date = $"{pullRequest.request.CloseDate:yyyy/MM/dd HH:mm}";
 
-            string title =
-                $"&ldquo;{pullRequest.request.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{pullRequest.request.CreateBy}&nbsp;{pullRequest.request.Status}";
+            string title = $"&ldquo;{pullRequest.request.TargetRefName}&rdquo;&nbsp;{date}&nbsp;{pullRequest.request.CreateBy}&nbsp;{pullRequest.request.Status}";
 
             string linkText = $"<span title='{title}'>{pullRequest.request.Id}</span>";
 

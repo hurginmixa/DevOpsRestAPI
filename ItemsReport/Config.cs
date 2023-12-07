@@ -10,6 +10,8 @@ namespace ItemsReport
 {
     public class Config
     {
+        #region public class FilterClass
+
         public class FilterClass
         {
             public string[] SelectedBranchPaths { get; set; } = Array.Empty<string>();
@@ -42,7 +44,11 @@ namespace ItemsReport
             }
         }
 
+        #endregion
+
         public string Token => PatContainer.PersonalAccessToken;
+
+        public string HTMLTitle { get; set; } = "TFS Report";
 
         [JsonPropertyName("Old Ids")]
         public int[] OldIds { get; set; } = Array.Empty<int>();
@@ -55,9 +61,13 @@ namespace ItemsReport
 
         public FilterClass Filter { get; set; } = new FilterClass();
 
-        public static Config GetConfig()
+        public static Config GetConfig(string configFileName)
         {
-            string json = File.ReadAllText(PPath.GetExeDirectory() / "Config.json");
+            string configFilePath = PPath.GetExeDirectory() / configFileName;
+
+            Console.WriteLine($"configFilePath: {configFilePath}");
+
+            string json = File.ReadAllText(configFilePath);
 
             return JsonSerializer.Deserialize<Config>(json);
         }
