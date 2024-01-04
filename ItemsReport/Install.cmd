@@ -1,6 +1,6 @@
 set runPath=%~d0%~p0
 
-set srcFolder=%runPath%bin\Debug\net5.0\
+set srcFolder=%runPath%bin\Debug\net6.0\
 set targetFolder=c:\Mixa\ItemsReport\
 
 if not exist "%targetFolder%" mkdir "%targetFolder%"
