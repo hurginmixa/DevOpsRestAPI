@@ -116,7 +116,7 @@ namespace ItemsReport
                     }
 
                     string style = $"background-color:{ColorTranslator.ToHtml(color)};";
-                    if (pullRequestList.Length == 0 && !workItem.IsClosed)
+                    if (pullRequestList.Length == 0 && !(workItem.IsClosed || workItem.IsResolved))
                     {
                         style += " font-weight: bold;";
                     }
@@ -158,7 +158,12 @@ namespace ItemsReport
                     textWriter.Write($"<td>{workItemText}</td>");
 
                     // ------------ state
-                    textWriter.Write($"<td>{workItem.State}</td>");
+                    string workItemState = workItem.State;
+                    if (workItem.HasActiveSubItems)
+                    {
+                        workItemState += "&nbsp;(HAS)";
+                    }
+                    textWriter.Write($"<td>{workItemState}</td>");
 
                     textWriter.Write($"<td>{workItem.AssignedTo}</td>");
 

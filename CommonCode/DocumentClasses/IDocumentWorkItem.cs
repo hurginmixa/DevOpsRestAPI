@@ -29,6 +29,8 @@ namespace CommonCode.DocumentClasses
 
         bool IsClosed { get; }
         
+        bool IsResolved { get; }
+        
         bool IsInProgress { get; }
         
         bool IsActive { get; }

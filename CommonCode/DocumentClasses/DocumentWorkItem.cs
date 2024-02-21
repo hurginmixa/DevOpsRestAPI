@@ -83,7 +83,7 @@ namespace CommonCode.DocumentClasses
         {
             get
             {
-                if (IsActive || IsInProgress || IsInvestigation || IsProposed || IsInProgress)
+                if (IsActive || IsInProgress || IsInvestigation || IsProposed )
                 {
                     return true;
                 }
@@ -108,6 +108,8 @@ namespace CommonCode.DocumentClasses
         public string AssignedTo => _assignedTo;
 
         public bool IsClosed => _state == "Closed";
+        
+        public bool IsResolved => _state == "Resolved";
 
         public bool IsInProgress => _state == "In Progress";
         
