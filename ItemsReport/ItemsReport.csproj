@@ -39,6 +39,7 @@
   <PropertyGroup>
     <TypeScriptSourceMap>false</TypeScriptSourceMap>
     <TypeScriptOutFile>ItemReportScript.js</TypeScriptOutFile>
+    <TypeScriptTarget>ES6</TypeScriptTarget>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="bin\Debug\net5.0\Scripts\" />

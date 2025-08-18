@@ -116,10 +116,7 @@ namespace ItemsReport
 
             Task[] tasks = gitWorkItemList.Value.Select(gitWorkItem => PerformWorkItem(gitWorkItem, workItemList, levelNumber, config)).ToArray();
 
-            foreach (Task task in tasks)
-            {
-                await task;
-            }
+            await Task.WhenAll(tasks);
         }
 
         private static async Task PerformWorkItem(GitWorkItem gitWorkItem, IDocumentWorkItemList workItemList, int levelNumber, Config config)

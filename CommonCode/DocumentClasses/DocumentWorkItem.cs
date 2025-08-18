@@ -23,7 +23,7 @@ namespace CommonCode.DocumentClasses
             _workItemType = workItem.Fields.WorkItemType;
             _state = workItem.Fields.State;
             _title = workItem.Fields.Title;
-            _assignedTo = workItem.Fields.AssignedTo.DisplayName;
+            _assignedTo = workItem.Fields.AssignedTo?.DisplayName ?? "No Name";
             _html = workItem.Links.Html.Href;
         }
 
@@ -83,7 +83,7 @@ namespace CommonCode.DocumentClasses
         {
             get
             {
-                if (IsActive || IsInProgress || IsInvestigation || IsProposed )
+                if (IsActive || IsInProgress || IsInvestigation || IsProposed || IsValidation)
                 {
                     return true;
                 }
@@ -116,6 +116,8 @@ namespace CommonCode.DocumentClasses
         public bool IsActive => _state == "Active";
         
         public bool IsProposed => _state == "Proposed";
+        
+        public bool IsValidation => _state == "Validation";
         
         public bool IsInvestigation => _state == "Investigation";
 

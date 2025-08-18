@@ -1,7 +1,39 @@
 ﻿/// <reference path="FolderElementClass.ts" />
 /// <reference path="LineMarkerClass.ts" />
+/// <reference path="AzureTools.ts" />
 
 let LineMarker: LineMarkerClass | null = null;
+
+interface Post {
+    userId: number;
+    id: number;
+    title: string;
+    body: string;
+}
+
+async function fetchPosts(url: string): Promise<Post[]> {
+    const response = await fetch(url);
+    if (!response.ok) 
+    {
+        throw new Error(`Ошибка: ${response.status}`);
+    }
+
+    return response.json(); // Типизируем автоматически как Post[]
+}
+
+(async () => {
+    try {
+        const posts: Post[]  = await fetchPosts('https://jsonplaceholder.typicode.com/posts');
+
+        console.log(`Count:${posts.length}`)
+
+        posts.forEach(post => {
+            console.log(`!!!!** title: ${post.title} user: ${post.userId}`);
+        });
+    } catch (error) {
+        console.error(error);
+    }
+})();
 
 function onDocumentClick(ev: Event)
 {
