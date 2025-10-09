@@ -30,7 +30,29 @@ namespace ItemsReport
             textWriter.WriteLine("&nbsp;&nbsp;&nbsp;<button onclick='OnCollapseAll()' class='favorite styled'>Collapse All</button><br /><br />");
             textWriter.WriteLine("<table>");
 
-            string[] reportedPaths = workItemList.GetUniqueCommittedPaths().OrderBy(s => s).ToArray();
+            string[] reportedPaths = workItemList.GetUniqueCommittedPaths()
+                .Select(s =>
+                {
+                    int prior;
+                    switch (s)
+                    {
+                        case "ver/10.0/2024/04/rel":
+                            prior = 0;
+                            break;
+                        case "ver/11.0/2025/06/rel":
+                            prior = 1;
+                            break;
+                        default:
+                        {
+                            prior = s.StartsWith("ver") ? 2 : 3;
+                            break;
+                        }
+                    }
+                    return new {S = s, Prior = prior};
+                })
+                .OrderBy(s => s.Prior).ThenBy(s => s.S)
+                .Select(s => s.S)
+                .ToArray();
 
             textWriter.WriteLine("<thead>");
             textWriter.WriteLine("<tr>");
