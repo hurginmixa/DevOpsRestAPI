@@ -1,0 +1,63 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using CommonCode;
+
+namespace ItemsReport.Services
+{
+    public class ReportConfig
+    {
+        #region public class FilterClass
+
+        public class FilterClass
+        {
+            public string[] SelectedBranchPaths { get; set; } = Array.Empty<string>();
+
+            public DateTime StartDate { get; set; } = DateTime.MinValue;
+
+            public DateTime EndDate { get; set; } = DateTime.MaxValue;
+
+            public bool IsFiltered
+            {
+                get
+                {
+                    if (StartDate != DateTime.MinValue)
+                    {
+                        return true;
+                    }
+
+                    if (EndDate != DateTime.MaxValue)
+                    {
+                        return true;
+                    }
+
+                    if (SelectedBranchPaths.Length != 0)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
+        }
+
+        #endregion
+
+        [Required]
+        public string Token { get; set; } = string.Empty;
+
+        public string HTMLTitle { get; set; } = "TFS Report";
+
+        [JsonPropertyName("Old Ids")]
+        public int[] OldIds { get; set; } = Array.Empty<int>();
+
+        public int[] Ids { get; set; } = Array.Empty<int>();
+
+        public string OutputFile { get; set; } = "Report.html";
+
+        public string CacheDataFile { get; set; } = "CacheData.json";
+
+        public FilterClass Filter { get; set; } = new FilterClass();
+    }
+}

@@ -1,0 +1,570 @@
+[
+    {
+        "Id": 38324,
+        "WorkItemType": "Issue",
+        "State": "Resolved",
+        "Title": "#22 LayerRadius in TDX (V, only 2 layesrs are supported)",
+        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/38324",
+        "AssignedTo": "Dorit Aviram",
+        "SubItemList": [
+            {
+                "Id": 38325,
+                "WorkItemType": "Bug",
+                "State": "Resolved",
+                "Title": "LayerRadius in TDX- bug",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/38325",
+                "AssignedTo": "Mixa Hurgin",
+                "SubItemList": [
+                    {
+                        "Id": 38521,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing the bug 38325 into apollo7.0.REL_OCT.2022",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/38521",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 11188,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo7.0.REL/OCT.2022",
+                                "CloseDate": "2022-12-28T19:24:15.4418251+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 38522,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing the Bug 38325 into 10.0-Dev",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/38522",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 11210,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/dev",
+                                "CloseDate": "2022-12-29T14:56:34.0940404+02:00",
+                                "CreateBy": "Gil Tapiero"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 41074,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing the bug 38325 into apollo-7.0-Dev",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/41074",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 11197,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo7.0dev",
+                                "CloseDate": "2022-12-29T09:41:38.508773+02:00",
+                                "CreateBy": "Gil Tapiero"
+                            },
+                            {
+                                "Id": 11200,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo7.0dev",
+                                "CloseDate": "2022-12-29T10:35:05.7371356+02:00",
+                                "CreateBy": "Gil Tapiero"
+                            },
+                            {
+                                "Id": 11204,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo7.0dev",
+                                "CloseDate": "2022-12-29T13:30:43.7135244+02:00",
+                                "CreateBy": "Gil Tapiero"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 41076,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing the bug 38325 \u0022LayerRadius in TDX- bug\u0022 into 10.0-Jan-2023",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/41076",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 13663,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo7.0.REL/JAN.2023",
+                                "CloseDate": "2023-05-03T13:03:23.8466922+03:00",
+                                "CreateBy": "Gil Tapiero"
+                            }
+                        ]
+                    }
+                ],
+                "PullRequestList": [
+                    {
+                        "Id": 11200,
+                        "Status": "completed",
+                        "TargetRefName": "ver/10.0/apollo7.0dev",
+                        "CloseDate": "2022-12-29T10:35:05.7371356+02:00",
+                        "CreateBy": "Gil Tapiero"
+                    },
+                    {
+                        "Id": 11204,
+                        "Status": "completed",
+                        "TargetRefName": "ver/10.0/apollo7.0dev",
+                        "CloseDate": "2022-12-29T13:30:43.7135244+02:00",
+                        "CreateBy": "Gil Tapiero"
+                    }
+                ]
+            }
+        ],
+        "PullRequestList": [
+            
+        ]
+    },
+    {
+        "Id": 41084,
+        "WorkItemType": "Bug",
+        "State": "Resolved",
+        "Title": "SKHynix Dead lock on Creating step from Parallel CMM",
+        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/41084",
+        "AssignedTo": "Mixa Hurgin",
+        "SubItemList": [
+            {
+                "Id": 41085,
+                "WorkItemType": "Task",
+                "State": "Resolved",
+                "Title": "Fixing BUG 41084: \u0022SKHynix Dead lock on Creating step from Parallel CMM\u0022 info 10.0-MAR-2023",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/41085",
+                "AssignedTo": "Mixa Hurgin",
+                "SubItemList": [
+                    
+                ],
+                "PullRequestList": [
+                    {
+                        "Id": 13678,
+                        "Status": "completed",
+                        "TargetRefName": "ver/10.0/2023/03/rel",
+                        "CloseDate": "2023-05-03T20:27:37.7445939+03:00",
+                        "CreateBy": "Mixa Hurgin"
+                    }
+                ]
+            },
+            {
+                "Id": 41086,
+                "WorkItemType": "Task",
+                "State": "Resolved",
+                "Title": "Fixing BUG 41084: \u0022SKHynix Dead lock on Creating step from Parallel CMM\u0022 info 10.0-Dev",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/41086",
+                "AssignedTo": "Mixa Hurgin",
+                "SubItemList": [
+                    
+                ],
+                "PullRequestList": [
+                    {
+                        "Id": 13845,
+                        "Status": "completed",
+                        "TargetRefName": "ver/10.0/dev",
+                        "CloseDate": "2023-05-11T15:50:17.602913+03:00",
+                        "CreateBy": "Mixa Hurgin"
+                    }
+                ]
+            },
+            {
+                "Id": 41365,
+                "WorkItemType": "Task",
+                "State": "Resolved",
+                "Title": "Task 41085: Fixing BUG 41084: \u0022SKHynix Dead lock on Creating step from Parallel CMM\u0022 info 10.0-JUL-2023",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/41365",
+                "AssignedTo": "Mixa Hurgin",
+                "SubItemList": [
+                    
+                ],
+                "PullRequestList": [
+                    {
+                        "Id": 13956,
+                        "Status": "completed",
+                        "TargetRefName": "ver/10.0/2023/07/rel",
+                        "CloseDate": "2023-05-16T16:29:55.5024576+03:00",
+                        "CreateBy": "Mixa Hurgin"
+                    }
+                ]
+            }
+        ],
+        "PullRequestList": [
+            
+        ]
+    },
+    {
+        "Id": 44386,
+        "WorkItemType": "Task",
+        "State": "Resolved",
+        "Title": "Feature 43580: Klarf_Flex requested change Into 9.4 Jul",
+        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/44386",
+        "AssignedTo": "Ronen Rabayev",
+        "SubItemList": [
+            
+        ],
+        "PullRequestList": [
+            {
+                "Id": 17120,
+                "Status": "completed",
+                "TargetRefName": "ver/9.4/2023/07/rel",
+                "CloseDate": "2023-09-28T16:10:59.5853658+03:00",
+                "CreateBy": "Ronen Rabayev"
+            }
+        ]
+    },
+    {
+        "Id": 45899,
+        "WorkItemType": "Issue",
+        "State": "Resolved",
+        "Title": "TDX color images",
+        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/45899",
+        "AssignedTo": "Dorit Aviram",
+        "SubItemList": [
+            {
+                "Id": 45900,
+                "WorkItemType": "Bug",
+                "State": "Resolved",
+                "Title": "TDX color images",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/45900",
+                "AssignedTo": "Mixa Hurgin",
+                "SubItemList": [
+                    {
+                        "Id": 45962,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing Bug 45900: TDX color images into Apollo-9",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/45962",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 19096,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo/9.0",
+                                "CloseDate": "2023-12-07T20:26:40.1871013+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            },
+                            {
+                                "Id": 19099,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo/9.0",
+                                "CloseDate": "2023-12-08T10:24:50.6270686+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 45963,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing Bug 45900: TDX color images into 10.0-MAR-2023",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/45963",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 19097,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/2023/03/rel",
+                                "CloseDate": "2023-12-07T21:11:10.1266617+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            },
+                            {
+                                "Id": 19098,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/2023/03/rel",
+                                "CloseDate": "2023-12-08T10:09:15.0219173+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 45964,
+                        "WorkItemType": "Task",
+                        "State": "Closed",
+                        "Title": "Fixing Bug 45900: TDX color images into 10.0-DEC-2023",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/45964",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            
+                        ]
+                    },
+                    {
+                        "Id": 46325,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing Bug 45900: TDX color images into RC-10.0-APR-2024",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46325",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 19570,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/2024/04/rc",
+                                "CloseDate": "2024-01-03T22:51:40.3408787+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            }
+                        ]
+                    }
+                ],
+                "PullRequestList": [
+                    
+                ]
+            },
+            {
+                "Id": 46185,
+                "WorkItemType": "Bug",
+                "State": "Resolved",
+                "Title": "TDX B/W images",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46185",
+                "AssignedTo": "Mixa Hurgin",
+                "SubItemList": [
+                    {
+                        "Id": 46187,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing Bug 46185: TDX B/W images into Apollo-9",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46187",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 19242,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo/9.0",
+                                "CloseDate": "2023-12-18T09:50:12.9234654+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            },
+                            {
+                                "Id": 19557,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo/9.0",
+                                "CloseDate": "2024-01-03T11:50:51.7739624+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 46417,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing Bug 46185: TDX B/W images into 10.0-04-2024-RC",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46417",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 20074,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/2024/04/rc",
+                                "CloseDate": "2024-02-02T00:58:19.1425843+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            }
+                        ]
+                    }
+                ],
+                "PullRequestList": [
+                    
+                ]
+            },
+            {
+                "Id": 46225,
+                "WorkItemType": "Bug",
+                "State": "Closed",
+                "Title": "TDX, \u0022MEASUREMENT_ID\u0022 is missing for GR images, and have another value for COLOR images",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46225",
+                "AssignedTo": "Mixa Hurgin",
+                "SubItemList": [
+                    {
+                        "Id": 46351,
+                        "WorkItemType": "Task",
+                        "State": "Closed",
+                        "Title": "Fixing Bug 46225: (TDX, \u0022MEASUREMENT_ID\u0022 is missing for GR images, and have another value for COLOR images) into Apollo 9",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46351",
+                        "AssignedTo": "Mixa Hurgin",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            
+                        ]
+                    }
+                ],
+                "PullRequestList": [
+                    
+                ]
+            },
+            {
+                "Id": 46227,
+                "WorkItemType": "Bug",
+                "State": "Closed",
+                "Title": "Offline Verification: grey image is not shown for a defect in FOV in Verify tab",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46227",
+                "AssignedTo": "Mixa Hurgin",
+                "SubItemList": [
+                    
+                ],
+                "PullRequestList": [
+                    
+                ]
+            },
+            {
+                "Id": 46230,
+                "WorkItemType": "Bug",
+                "State": "Closed",
+                "Title": "TDX, saved TDX images have wrong IMG_BOX_CTR_X, IMG_BOX_CTR_Y values ",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46230",
+                "AssignedTo": "Natalia Sverchkov",
+                "SubItemList": [
+                    {
+                        "Id": 46358,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing bug 46230: TDX, saved TDX images have wrong IMG_BOX_CTR_X, IMG_BOX_CTR_Y values",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46358",
+                        "AssignedTo": "Natalia Sverchkov",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 19491,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo/9.0",
+                                "CloseDate": "2023-12-31T18:15:26.2136142+02:00",
+                                "CreateBy": "Natalia Sverchkov"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 46360,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Fixing bug 46230: TDX, saved TDX images have wrong IMG_BOX_CTR_X, IMG_BOX_CTR_Y values - 10.0 April 2024 rc",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46360",
+                        "AssignedTo": "Natalia Sverchkov",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 20965,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/2024/04/rc",
+                                "CloseDate": "2024-03-18T18:28:19.7321666+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            },
+                            {
+                                "Id": 21072,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/2024/04/rc",
+                                "CloseDate": "2024-03-21T20:17:16.9762146+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            }
+                        ]
+                    }
+                ],
+                "PullRequestList": [
+                    
+                ]
+            },
+            {
+                "Id": 46246,
+                "WorkItemType": "Bug",
+                "State": "Closed",
+                "Title": "CMM Regression-Apollo9-build 38- Regression failed, KlarfConverter failed",
+                "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46246",
+                "AssignedTo": "Ronen Rabayev",
+                "SubItemList": [
+                    {
+                        "Id": 46345,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "Bug 46246: CMM Regression-Apollo9-build 38- Regression failed, KlarfConverter failed Into Apollo 9.0",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46345",
+                        "AssignedTo": "Ronen Rabayev",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 19473,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/apollo/9.0",
+                                "CloseDate": "2023-12-31T11:54:13.5334402+02:00",
+                                "CreateBy": "Ronen Rabayev"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 46354,
+                        "WorkItemType": "Task",
+                        "State": "Resolved",
+                        "Title": "CMM Regression-Apollo9-build 38- Regression failed, KlarfConverter failed - Apr RC",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46354",
+                        "AssignedTo": "Ronen Rabayev",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            {
+                                "Id": 20082,
+                                "Status": "completed",
+                                "TargetRefName": "ver/10.0/2024/04/rc",
+                                "CloseDate": "2024-02-04T14:40:31.8010107+02:00",
+                                "CreateBy": "Mixa Hurgin"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": 46357,
+                        "WorkItemType": "Task",
+                        "State": "Closed",
+                        "Title": "CMM Regression-Apollo9-build 38- Regression failed, KlarfConverter failed - 10 Dec",
+                        "Html": "https://dev.azure.com/AzCamtek/6bb4ebf7-76a7-46d8-b6e8-39415c9829f9/_workitems/edit/46357",
+                        "AssignedTo": "Ronen Rabayev",
+                        "SubItemList": [
+                            
+                        ],
+                        "PullRequestList": [
+                            
+                        ]
+                    }
+                ],
+                "PullRequestList": [
+                    
+                ]
+            }
+        ],
+        "PullRequestList": [
+            
+        ]
+    }
+]

@@ -19,7 +19,7 @@ namespace ItemsReport
 
         public CacheHandler(Config config)
         {
-            _cacheDataFilePath = Path.GetFullPath(config.CacheDataFile);
+            _cacheDataFilePath = PPath.GetExeDirectory() / config.CacheDataFile;
         }
 
         public DocumentWorkItemData[] ReadFromCache()

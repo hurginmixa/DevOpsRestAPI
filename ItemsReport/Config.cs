@@ -55,9 +55,9 @@ namespace ItemsReport
 
         public int[] Ids { get; set; } = Array.Empty<int>();
 
-        public string OutputFile { get; set; }
+        public string OutputFile { get; set; } = "Report.html";
 
-        public string CacheDataFile { get; set; }
+        public string CacheDataFile { get; set; } = "CacheData.json";
 
         public FilterClass Filter { get; set; } = new FilterClass();
 

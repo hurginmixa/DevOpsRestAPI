@@ -11,12 +11,10 @@ namespace ItemsReport
 {
     public static class PrinterHtml
     {
-        public static void Print(IDocumentWorkItemList workItemList, Config config)
+        public static string PrintToString(IDocumentWorkItemList workItemList, Config config)
         {
-            string outputFileName = Path.GetFullPath(config.OutputFile);
-
-            using Stream textStream = new FileStream(outputFileName, FileMode.Create);
-            using TextWriter textWriter = new StreamWriter(textStream, Encoding.UTF8);
+            StringBuilder sb = new StringBuilder();
+            using TextWriter textWriter = new StringWriter(sb);
 
             textWriter.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
             textWriter.WriteLine(@"<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.0 Strict//EN"" ""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"">");
@@ -24,7 +22,7 @@ namespace ItemsReport
             textWriter.WriteLine("<head>");
             textWriter.WriteLine($"<title>{config.HTMLTitle}</title>");
             textWriter.WriteLine(GetStyles());
-            textWriter.WriteLine(GetScripts(outputFileName));
+            textWriter.WriteLine("<script src='ItemReportScript.js'></script>");
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body ondblclick='onDocumentClick(event)'>");
             textWriter.WriteLine("&nbsp;&nbsp;&nbsp;<button onclick='OnCollapseAll()' class='favorite styled'>Collapse All</button><br /><br />");
@@ -95,18 +93,18 @@ namespace ItemsReport
                     }                    
                 }
 
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb2 = new StringBuilder();
 
                 foreach (string path in reportedPaths)
                 {
-                    sb.Append("<td>");
+                    sb2.Append("<td>");
 
-                    sb.Append(builders[path].ToString());
+                    sb2.Append(builders[path].ToString());
 
-                    sb.Append("</td>");
+                    sb2.Append("</td>");
                 }
 
-                textWriter.Write(sb);
+                textWriter.Write(sb2);
             }
 
             #endregion
@@ -214,6 +212,8 @@ namespace ItemsReport
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+
+            return sb.ToString();
         }
 
         private static Color GetFolderColor(IDocumentWorkItem workItem)
