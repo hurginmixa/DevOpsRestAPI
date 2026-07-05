@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>12</LangVersion>
     <AssemblyName>ItemsReport</AssemblyName>
     <RootNamespace>ItemsReport</RootNamespace>
@@ -25,13 +25,7 @@
     <None Update="PAT.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <TypeScriptCompile Update="Scripts\FolderElementClass.ts">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </TypeScriptCompile>
-    <TypeScriptCompile Update="Scripts\LineMarkerClass.ts">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </TypeScriptCompile>
-    <TypeScriptCompile Update="Scripts\MainScript.ts">
+    <TypeScriptCompile Update="Scripts\**\*.ts">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </TypeScriptCompile>
   </ItemGroup>
@@ -40,7 +34,4 @@
     <TypeScriptOutFile>ItemReportScript.js</TypeScriptOutFile>
     <TypeScriptTarget>ES6</TypeScriptTarget>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="bin\Debug\net5.0\Scripts\" />
-  </ItemGroup>
 </Project>
