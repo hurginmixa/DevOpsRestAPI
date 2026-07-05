@@ -155,11 +155,13 @@ namespace ItemsReport.Services
                     .Select(pullRequestId => HttpTools.GetPullRequestById(pullRequestId, _config.Token))
                     .ToArray();
 
-                Task.WaitAll(pullRequestTasks.Cast<Task>().ToArray());
+                // await вместо блокирующего Task.WaitAll: не занимаем поток пула,
+                // пока идут сетевые запросы.
+                string[] pullRequestResults = await Task.WhenAll(pullRequestTasks);
 
-                foreach (Task<string> pullRequestTask in pullRequestTasks)
+                foreach (string pullRequestResult in pullRequestResults)
                 {
-                    string result = CustJsonSerializer.FormatJson(pullRequestTask.Result);
+                    string result = CustJsonSerializer.FormatJson(pullRequestResult);
                     GitPullRequest pullRequest = JsonSerializer.Deserialize<GitPullRequest>(result);
 
                     workItem.AddPullRequest(new DocumentPullRequest(pullRequest));

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -11,6 +11,12 @@ namespace CommonCode
     {
         private const string Organization = "AzCamtek";
         private const string Project = "Falcon";
+
+        // Один общий HttpClient на всё приложение: он потокобезопасен для запросов
+        // и переиспользует TCP-соединения (keep-alive pooling). Так мы избегаем
+        // исчерпания сокетов (TIME_WAIT), которое возникает при "new HttpClient()"
+        // на каждый вызов.
+        private static readonly HttpClient HttpClient = new HttpClient();
 
         public static Task<string> GetPullRequestById(int id, string personalAccessToken)
         {
@@ -35,16 +41,23 @@ namespace CommonCode
             return PostStringByUri(uri, json, personalAccessToken);
         }
 
+        // Заголовок авторизации ставим на каждый HttpRequestMessage отдельно,
+        // а не на HttpClient.DefaultRequestHeaders: общий клиент используется
+        // из параллельных запросов, и общее изменяемое состояние вызвало бы гонки.
+        private static AuthenticationHeaderValue BuildBasicAuth(string personalAccessToken)
+        {
+            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{personalAccessToken}"));
+            return new AuthenticationHeaderValue("Basic", pat);
+        }
+
         private static async Task<string> GetStringByUri(string uri, string personalAccessToken)
         {
             try
             {
-                var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{personalAccessToken}"));
-                using var httpClient = new HttpClient();
+                using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+                request.Headers.Authorization = BuildBasicAuth(personalAccessToken);
 
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
-
-                HttpResponseMessage response = await httpClient.GetAsync(uri);
+                using HttpResponseMessage response = await HttpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
                 return await response.Content.ReadAsStringAsync();
@@ -57,14 +70,11 @@ namespace CommonCode
 
         private static async Task<string> PostStringByUri(string uri, string json, string personalAccessToken)
         {
-            var pat = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{personalAccessToken}"));
-            using var httpClient = new HttpClient();
+            using var request = new HttpRequestMessage(HttpMethod.Post, uri);
+            request.Headers.Authorization = BuildBasicAuth(personalAccessToken);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", pat);
-
-            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await httpClient.PostAsync(uri, content);
-
+            using HttpResponseMessage response = await HttpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();
