@@ -56,15 +56,21 @@ namespace ItemsReport.Services
         }
 
         // Перечитывает один item верхнего уровня вместе со всем поддеревом
-        // (дети + pull request'ы) напрямую с Azure и отдаёт его как DTO-дерево.
-        // Про колонки/секции сервер ничего не знает — это забота клиента.
-        public async Task<DocumentWorkItemData> RefreshItemAsync(int id)
+        // (дети + pull request'ы) напрямую с Azure. Возвращает "живой" объект,
+        // пригодный и для рендера (RenderRows), и для отдачи как DTO.
+        public async Task<IDocumentWorkItem> ReadItemAsync(int id)
         {
             DocumentWorkItemList workItemList = new DocumentWorkItemList();
 
             await PerformWorkItems(workItemNumbers: new[] { id }, workItemList: workItemList, levelNumber: 1);
 
-            IDocumentWorkItem item = workItemList.FirstOrDefault(i => i.Id == id);
+            return workItemList.FirstOrDefault(i => i.Id == id);
+        }
+
+        // То же, но в виде DTO-дерева. Про колонки/секции сервер не знает.
+        public async Task<DocumentWorkItemData> RefreshItemAsync(int id)
+        {
+            IDocumentWorkItem item = await ReadItemAsync(id);
 
             return item?.GetData();
         }

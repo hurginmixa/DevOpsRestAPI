@@ -78,7 +78,7 @@ namespace ItemsReport
                 foreach (IDocumentWorkItem workItem in items)
                 {
                     colorIndex = (colorIndex + 1) % colors.Length;
-                    textWriter.Write(RenderRows(new[] { workItem }, reportedPaths, colors[colorIndex], 0, 0));
+                    textWriter.Write(RenderRows(new[] { workItem }, reportedPaths, ColorTranslator.ToHtml(colors[colorIndex]), 0, 0));
                 }
             }
 
@@ -139,7 +139,7 @@ namespace ItemsReport
         // Рисует переданные item'ы вместе с их поддеревьями. Цвет фона задаётся
         // снаружи и наследуется вниз по уровням (ротацию цвета 1-го уровня делает
         // вызывающий код). Используется и полным отчётом, и перерисовкой поддерева.
-        public static string RenderRows(IEnumerable<IDocumentWorkItem> items, string[] reportedPaths, Color color, int levelNumber, int parentItemId)
+        public static string RenderRows(IEnumerable<IDocumentWorkItem> items, string[] reportedPaths, string colorHtml, int levelNumber, int parentItemId)
         {
             StringBuilder sb = new StringBuilder();
             using TextWriter textWriter = new StringWriter(sb);
@@ -148,7 +148,7 @@ namespace ItemsReport
             {
                 (DocumentPullRequest Request, bool IsOwner)[] pullRequestList = workItem.GetFullPullRequestList().Where(re => reportedPaths.Contains(re.Request.TargetRefName)).ToArray();
 
-                string style = $"background-color:{ColorTranslator.ToHtml(color)};";
+                string style = $"background-color:{colorHtml};";
                 if (pullRequestList.Length == 0 && !(workItem.IsClosed || workItem.IsResolved))
                 {
                     style += " font-weight: bold;";
@@ -207,7 +207,7 @@ namespace ItemsReport
 
                 textWriter.WriteLine("</tr>");
 
-                textWriter.Write(RenderRows(workItem.SubItems, reportedPaths, color, levelNumber + 1, workItem.Id));
+                textWriter.Write(RenderRows(workItem.SubItems, reportedPaths, colorHtml, levelNumber + 1, workItem.Id));
             }
 
             return sb.ToString();
