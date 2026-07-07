@@ -67,153 +67,148 @@ namespace ItemsReport
             textWriter.WriteLine("</tr>");
             textWriter.WriteLine("</thead>");
 
-            #region void PrintPullRequestList(IEnumerable<DocumentPullRequest> pullRequestList)
-
-            void PrintPullRequestList(IEnumerable<(DocumentPullRequest Request, bool IsOwner)> pullRequestList)
-            {
-                if (reportedPaths.Length <= 0)
-                {
-                    return;
-                }
-
-                (DocumentPullRequest Request, bool IsOwner)[] l = pullRequestList.OrderBy(r => r.Request.Id).ToArray();
-
-                Dictionary<string, StringBuilder> builders = reportedPaths.ToDictionary(i => i, i => new StringBuilder());
-
-                foreach ((DocumentPullRequest Request, bool IsOwner) tuple in l)
-                {
-                    foreach (string path in reportedPaths)
-                    {
-                        string linkText = tuple.Request.TargetRefName == path ? GetLinkText(tuple) : "&nbsp;";
-
-                        builders[path].Append($"{linkText}<br>");
-                    }                    
-                }
-
-                StringBuilder sb2 = new StringBuilder();
-
-                foreach (string path in reportedPaths)
-                {
-                    sb2.Append("<td>");
-
-                    sb2.Append(builders[path].ToString());
-
-                    sb2.Append("</td>");
-                }
-
-                textWriter.Write(sb2);
-            }
-
-            #endregion
-
             Color[] colors = {Color.Aquamarine, Color.MistyRose, Color.LightSkyBlue, Color.DarkSeaGreen, Color.LightPink };
             int colorIndex = -1;
 
-            #region void StartLevelsReporting(IDocumentWorkItemList oneLevelItemList)
-
-            void StartLevelsReporting(IDocumentWorkItemList oneLevelItemList)
+            // Каждый item 1-го уровня получает следующий цвет палитры по кругу.
+            // colorIndex общий на обе секции — чтобы вывод не менялся. Сами строки
+            // рисует переиспользуемый RenderRows.
+            void RenderSection(IEnumerable<IDocumentWorkItem> items)
             {
-                PrintLevel(oneLevelItemList, 0, Color.White, 0);
-            }
-
-            #endregion
-
-            #region void PrintLevel(IDocumentWorkItemList oneLevelItemList, int levelNumber, Color color)
-
-            void PrintLevel(IDocumentWorkItemList oneLevelItemList, int levelNumber, Color color, int parentItemId)
-            {
-                foreach (IDocumentWorkItem workItem in oneLevelItemList)
+                foreach (IDocumentWorkItem workItem in items)
                 {
-                    (DocumentPullRequest Request, bool IsOwner)[] pullRequestList = workItem.GetFullPullRequestList().Where(re => reportedPaths.Contains(re.Request.TargetRefName)).ToArray();
-
-                    if (levelNumber == 0)
-                    {
-                        colorIndex = (colorIndex + 1) % colors.Length;
-                        color = colors[colorIndex];
-                    }
-
-                    string style = $"background-color:{ColorTranslator.ToHtml(color)};";
-                    if (pullRequestList.Length == 0 && !(workItem.IsClosed || workItem.IsResolved))
-                    {
-                        style += " font-weight: bold;";
-                    }
-
-                    textWriter.WriteLine($"<tr style='{style}' id='{workItem.Id}' class='childOf_{parentItemId}'>");
-
-                    string markSpan = "\u25A2";
-                    if (workItem.SubItems.Any())
-                    {
-                        markSpan = $"<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >\u25e2</span>";
-                    }
-
-                    string lineShift = "&nbsp;";
-                    if (levelNumber != 0)
-                    {
-                        lineShift = string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 5));
-
-                        //lineShift += string.Concat(Enumerable.Repeat(">&nbsp;", levelNumber));
-
-                        lineShift += "&nbsp;&nbsp;";
-                    }
-
-                    string subItemsCount = workItem.SubItems.Any() ? $"&nbsp;(&nbsp;{workItem.SubItems.Count()}&nbsp;)" : string.Empty;
-
-                    // Иконка перерисовки — только для item'ов 1-го уровня.
-                    string refreshIcon = levelNumber == 0
-                        ? $"&nbsp;<span onclick='OnRefreshClick({workItem.Id})' style='cursor: pointer' title='Reload from Azure'>↻</span>"
-                        : string.Empty;
-
-                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{subItemsCount}{refreshIcon}</td>");
-
-                    // ------------ workItemTitle
-
-                    Color folderColor = GetFolderColor(workItem);
-                    string folder = $"<span style='color: {ColorTranslator.ToHtml(folderColor)};'>&#128447;</span>&nbsp;";
-
-                    string workItemTitle = workItem.Title;
-                    if (workItem.IsClosed && pullRequestList.Length == 0)
-                    {
-                        workItemTitle = $"<S>{workItemTitle}</S>";
-                    }
-                    string workItemText = $"{folder}<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItemTitle}";
-
-                    textWriter.Write($"<td>{workItemText}</td>");
-
-                    // ------------ state
-                    string workItemState = workItem.State;
-                    if (workItem.HasActiveSubItems)
-                    {
-                        workItemState += "&nbsp;(HAS)";
-                    }
-                    textWriter.Write($"<td>{workItemState}</td>");
-
-                    textWriter.Write($"<td>{workItem.AssignedTo}</td>");
-
-                    PrintPullRequestList(pullRequestList);
-
-                    textWriter.WriteLine("</tr>");
-
-                    PrintLevel(workItem.SubItems, levelNumber + 1, color, workItem.Id);
+                    colorIndex = (colorIndex + 1) % colors.Length;
+                    textWriter.Write(RenderRows(new[] { workItem }, reportedPaths, colors[colorIndex], 0, 0));
                 }
             }
-
-            #endregion
 
             textWriter.WriteLine("<tr>");
             textWriter.WriteLine($"<td colspan='{reportedPaths.Length + 4}'><h1>Not completed items</h1></td>");
             textWriter.WriteLine("</tr>");
 
-            StartLevelsReporting(oneLevelItemList: new DocumentWorkItemList(workItemList.Where(r => r.HasActiveSubItems)));
+            RenderSection(workItemList.Where(r => r.HasActiveSubItems));
 
             textWriter.WriteLine("<tr>");
             textWriter.WriteLine($"<td colspan='{reportedPaths.Length + 4}'><h1>Completed items</h1></td>");
             textWriter.WriteLine("</tr>");
 
-            StartLevelsReporting(oneLevelItemList: new DocumentWorkItemList(workItemList.Where(r => !r.HasActiveSubItems)));
+            RenderSection(workItemList.Where(r => !r.HasActiveSubItems));
 
             textWriter.WriteLine("</table>");
             textWriter.WriteLine("</body>");
             textWriter.WriteLine("</html>");
+
+            return sb.ToString();
+        }
+
+        private static string RenderPullRequestCells(string[] reportedPaths, IEnumerable<(DocumentPullRequest Request, bool IsOwner)> pullRequestList)
+        {
+            if (reportedPaths.Length <= 0)
+            {
+                return string.Empty;
+            }
+
+            (DocumentPullRequest Request, bool IsOwner)[] l = pullRequestList.OrderBy(r => r.Request.Id).ToArray();
+
+            Dictionary<string, StringBuilder> builders = reportedPaths.ToDictionary(i => i, i => new StringBuilder());
+
+            foreach ((DocumentPullRequest Request, bool IsOwner) tuple in l)
+            {
+                foreach (string path in reportedPaths)
+                {
+                    string linkText = tuple.Request.TargetRefName == path ? GetLinkText(tuple) : "&nbsp;";
+
+                    builders[path].Append($"{linkText}<br>");
+                }
+            }
+
+            StringBuilder sb2 = new StringBuilder();
+
+            foreach (string path in reportedPaths)
+            {
+                sb2.Append("<td>");
+
+                sb2.Append(builders[path].ToString());
+
+                sb2.Append("</td>");
+            }
+
+            return sb2.ToString();
+        }
+
+        // Рисует переданные item'ы вместе с их поддеревьями. Цвет фона задаётся
+        // снаружи и наследуется вниз по уровням (ротацию цвета 1-го уровня делает
+        // вызывающий код). Используется и полным отчётом, и перерисовкой поддерева.
+        public static string RenderRows(IEnumerable<IDocumentWorkItem> items, string[] reportedPaths, Color color, int levelNumber, int parentItemId)
+        {
+            StringBuilder sb = new StringBuilder();
+            using TextWriter textWriter = new StringWriter(sb);
+
+            foreach (IDocumentWorkItem workItem in items)
+            {
+                (DocumentPullRequest Request, bool IsOwner)[] pullRequestList = workItem.GetFullPullRequestList().Where(re => reportedPaths.Contains(re.Request.TargetRefName)).ToArray();
+
+                string style = $"background-color:{ColorTranslator.ToHtml(color)};";
+                if (pullRequestList.Length == 0 && !(workItem.IsClosed || workItem.IsResolved))
+                {
+                    style += " font-weight: bold;";
+                }
+
+                textWriter.WriteLine($"<tr style='{style}' id='{workItem.Id}' class='childOf_{parentItemId}'>");
+
+                string markSpan = "\u25A2";
+                if (workItem.SubItems.Any())
+                {
+                    markSpan = $"<span id='mark' onclick='OnMarkClick(this, {workItem.Id})' style='cursor: pointer' >\u25e2</span>";
+                }
+
+                string lineShift = "&nbsp;";
+                if (levelNumber != 0)
+                {
+                    lineShift = string.Concat(Enumerable.Repeat("&nbsp;", levelNumber * 5));
+
+                    lineShift += "&nbsp;&nbsp;";
+                }
+
+                string subItemsCount = workItem.SubItems.Any() ? $"&nbsp;(&nbsp;{workItem.SubItems.Count()}&nbsp;)" : string.Empty;
+
+                // Иконка перерисовки — только для item'ов 1-го уровня.
+                string refreshIcon = levelNumber == 0
+                    ? $"&nbsp;<span onclick='OnRefreshClick({workItem.Id})' style='cursor: pointer' title='Reload from Azure'>↻</span>"
+                    : string.Empty;
+
+                textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{subItemsCount}{refreshIcon}</td>");
+
+                // ------------ workItemTitle
+
+                Color folderColor = GetFolderColor(workItem);
+                string folder = $"<span style='color: {ColorTranslator.ToHtml(folderColor)};'>&#128447;</span>&nbsp;";
+
+                string workItemTitle = workItem.Title;
+                if (workItem.IsClosed && pullRequestList.Length == 0)
+                {
+                    workItemTitle = $"<S>{workItemTitle}</S>";
+                }
+                string workItemText = $"{folder}<b>{workItem.WorkItemType}</b>&nbsp;:&nbsp;{workItemTitle}";
+
+                textWriter.Write($"<td>{workItemText}</td>");
+
+                // ------------ state
+                string workItemState = workItem.State;
+                if (workItem.HasActiveSubItems)
+                {
+                    workItemState += "&nbsp;(HAS)";
+                }
+                textWriter.Write($"<td>{workItemState}</td>");
+
+                textWriter.Write($"<td>{workItem.AssignedTo}</td>");
+
+                textWriter.Write(RenderPullRequestCells(reportedPaths, pullRequestList));
+
+                textWriter.WriteLine("</tr>");
+
+                textWriter.Write(RenderRows(workItem.SubItems, reportedPaths, color, levelNumber + 1, workItem.Id));
+            }
 
             return sb.ToString();
         }
