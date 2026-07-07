@@ -22,7 +22,7 @@ namespace ItemsReport
             textWriter.WriteLine("<head>");
             textWriter.WriteLine($"<title>{config.HTMLTitle}</title>");
             textWriter.WriteLine(GetStyles());
-            textWriter.WriteLine("<script src='ItemReportScript.js'></script>");
+            textWriter.WriteLine($"<script src='ItemReportScript.js?v={System.DateTime.Now.Ticks}'></script>");
             textWriter.WriteLine("</head>");
             textWriter.WriteLine("<body ondblclick='onDocumentClick(event)'>");
             textWriter.WriteLine("&nbsp;&nbsp;&nbsp;<button onclick='OnCollapseAll()' class='favorite styled'>Collapse All</button><br /><br />");
@@ -158,7 +158,12 @@ namespace ItemsReport
 
                     string subItemsCount = workItem.SubItems.Any() ? $"&nbsp;(&nbsp;{workItem.SubItems.Count()}&nbsp;)" : string.Empty;
 
-                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{subItemsCount}</td>");
+                    // Иконка перерисовки — только для item'ов 1-го уровня.
+                    string refreshIcon = levelNumber == 0
+                        ? $"&nbsp;<span onclick='OnRefreshClick({workItem.Id})' style='cursor: pointer' title='Reload from Azure'>↻</span>"
+                        : string.Empty;
+
+                    textWriter.Write($"<td style='white-space: nowrap'><code>{lineShift}{markSpan}</code>&nbsp;<a href='{workItem.Html}' target='_blank'>{workItem.Id}</a>{subItemsCount}{refreshIcon}</td>");
 
                     // ------------ workItemTitle
 

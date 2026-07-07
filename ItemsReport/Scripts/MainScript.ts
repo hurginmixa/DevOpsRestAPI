@@ -4,36 +4,27 @@
 
 let LineMarker: LineMarkerClass | null = null;
 
-interface Post {
-    userId: number;
-    id: number;
-    title: string;
-    body: string;
-}
-
-async function fetchPosts(url: string): Promise<Post[]> {
-    const response = await fetch(url);
-    if (!response.ok) 
+// Клик по иконке ↻ у item'а 1-го уровня: запрашиваем поддерево с сервера
+// (POST /refresh/{id}) и показываем полученный JSON в messagebox.
+async function OnRefreshClick(id: number): Promise<void>
+{
+    try
     {
-        throw new Error(`Ошибка: ${response.status}`);
-    }
+        const response = await fetch(`refresh/${id}`, { method: "POST" });
+        if (!response.ok)
+        {
+            alert(`Refresh failed: ${response.status}`);
+            return;
+        }
 
-    return response.json(); // Типизируем автоматически как Post[]
+        const data = await response.json();
+        alert(JSON.stringify(data, null, 4));
+    }
+    catch (error)
+    {
+        alert(`Refresh error: ${error}`);
+    }
 }
-
-(async () => {
-    try {
-        const posts: Post[]  = await fetchPosts('https://jsonplaceholder.typicode.com/posts');
-
-        console.log(`Count:${posts.length}`)
-
-        posts.forEach(post => {
-            console.log(`!!!!** title: ${post.title} user: ${post.userId}`);
-        });
-    } catch (error) {
-        console.error(error);
-    }
-})();
 
 function onDocumentClick(ev: Event)
 {

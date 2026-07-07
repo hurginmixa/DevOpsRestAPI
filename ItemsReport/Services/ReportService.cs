@@ -55,6 +55,20 @@ namespace ItemsReport.Services
             return htmlOutput;
         }
 
+        // Перечитывает один item верхнего уровня вместе со всем поддеревом
+        // (дети + pull request'ы) напрямую с Azure и отдаёт его как DTO-дерево.
+        // Про колонки/секции сервер ничего не знает — это забота клиента.
+        public async Task<DocumentWorkItemData> RefreshItemAsync(int id)
+        {
+            DocumentWorkItemList workItemList = new DocumentWorkItemList();
+
+            await PerformWorkItems(workItemNumbers: new[] { id }, workItemList: workItemList, levelNumber: 1);
+
+            IDocumentWorkItem item = workItemList.FirstOrDefault(i => i.Id == id);
+
+            return item?.GetData();
+        }
+
         private bool GetPredicate(DocumentPullRequest pr, Config config)
         {
             Config.FilterClass filter = config.Filter;
