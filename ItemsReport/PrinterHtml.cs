@@ -78,9 +78,6 @@ namespace ItemsReport
 
                 (DocumentPullRequest Request, bool IsOwner)[] l = pullRequestList.OrderBy(r => r.Request.Id).ToArray();
 
-                string[] r = pullRequestList.GroupBy(r => r.Request.TargetRefName).Select(r => r.Key).ToArray();
-
-
                 Dictionary<string, StringBuilder> builders = reportedPaths.ToDictionary(i => i, i => new StringBuilder());
 
                 foreach ((DocumentPullRequest Request, bool IsOwner) tuple in l)
@@ -229,25 +226,6 @@ namespace ItemsReport
 
                 default: return Color.Black;
             }
-
-            throw new System.NotImplementedException();
-        }
-
-        private static string GetScripts(string outputFileName)
-        {
-            PPath directoryName = Path.GetDirectoryName(outputFileName);
-
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(outputFileName);
-
-            const string baseScriptFileName = "ItemReportScript.js";
-            
-            string scriptFileName = $"{fileNameWithoutExtension}.js";
-
-            File.Copy(PPath.GetExeDirectory() / baseScriptFileName, directoryName / scriptFileName, true);
-
-            return @$"
-<script src='{scriptFileName}'></script>
-" ;
         }
 
         private static string GetLinkText((DocumentPullRequest request, bool owner) pullRequest)

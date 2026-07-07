@@ -1,35 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Json;
 using System.Text;
 
 namespace CommonCode
 {
     public static class CustJsonSerializer
     {
-        public static string Serialize<T>(T obj)
-        {
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(obj.GetType());
-            using (MemoryStream ms = new MemoryStream())
-            {
-                serializer.WriteObject(ms, obj);
-                return Encoding.Default.GetString(ms.ToArray());
-            }
-        }
-
-        public static T Deserialize<T>(string json)
-        {
-            json = !string.IsNullOrWhiteSpace(json) ? json : "[]";
-
-            using (MemoryStream ms = new MemoryStream(Encoding.Unicode.GetBytes(json)))
-            {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
-                return (T) serializer.ReadObject(ms);
-            }
-        }
-
         public static string FormatJson(string jsonText)
         {
             void ForEach<T>(IEnumerable<T> ie, Action<T> action)

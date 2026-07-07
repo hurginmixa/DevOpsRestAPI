@@ -123,7 +123,7 @@ namespace ItemsReport.Services
 
             foreach (GitWorkItemRelation relation in gitWorkItem.Relations)
             {
-                if (relation.Attributes.Name is "Child" or "Pull Request" or "Fixed in Commit")
+                if (relation.Attributes.Name is "Child" or "Pull Request")
                 {
                     string decodedUrl = Uri.UnescapeDataString(relation.Url);
                     string txtId = decodedUrl.Substring(decodedUrl.LastIndexOf('/') + 1);
