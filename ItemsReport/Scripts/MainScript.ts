@@ -1,8 +1,5 @@
 ﻿/// <reference path="FolderElementClass.ts" />
-/// <reference path="LineMarkerClass.ts" />
 /// <reference path="AzureTools.ts" />
-
-let LineMarker: LineMarkerClass | null = null;
 
 // Текущий набор колонок, который сервер впечатал в страницу.
 declare var reportedPaths: string[];
@@ -142,19 +139,25 @@ function onDocumentClick(ev: Event)
         return;
     }
 
-    const cellElement: HTMLTableCellElement = ev.target as HTMLTableCellElement;
-    const rowElement: HTMLTableRowElement = cellElement.parentElement as HTMLTableRowElement;
-
-    let currentId : number = +rowElement.id;
-    if (currentId <= 0)
+    const rowElement: HTMLTableRowElement = ev.target.parentElement as HTMLTableRowElement;
+    if (!rowElement || +rowElement.id <= 0)
     {
         return;
     }
 
-    let oldIdNumber : number = (LineMarker?.ItemId ?? -1);
-    LineMarker?.Hide();
+    // Пометить/снять: помеченной может быть только одна строка.
+    const wasMarked = rowElement.classList.contains("marked");
 
-    LineMarker = oldIdNumber === currentId ? null : new LineMarkerClass(rowElement);
+    const prev = document.querySelector("tr.marked");
+    if (prev)
+    {
+        prev.classList.remove("marked");
+    }
+
+    if (!wasMarked)
+    {
+        rowElement.classList.add("marked");
+    }
 
     ev.cancelBubble = true;
 }

@@ -394,7 +394,17 @@ namespace ItemsReport
   .section-label .dot { width: 8px; height: 8px; border-radius: 50%; }
   .section-label h2 { margin: 0; font-size: 12px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
 
-  td.idcell { white-space: nowrap; border-left: 6px solid var(--rail, transparent); }
+  /* колонка Id заморожена слева при горизонтальной прокрутке */
+  thead th:first-child { position: sticky; left: 0; z-index: 25; }
+  td.idcell {
+    position: sticky; left: 0; z-index: 1;
+    white-space: nowrap; background: var(--surface);
+    border-left: 6px solid var(--rail, transparent);
+  }
+  tbody tr.item:hover td.idcell { background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+  /* пометка строки (двойной клик) — держится, пока не снимут */
+  tbody tr.item.marked { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  tbody tr.item.marked td.idcell { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
   .idwrap { display: flex; align-items: center; gap: 6px; }
   .indent { display: inline-block; flex: none; }
   .caret {
