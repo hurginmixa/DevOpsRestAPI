@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+# Claude Code local tooling (preview launch config, local settings)
+.claude/

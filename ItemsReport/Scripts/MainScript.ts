@@ -7,6 +7,48 @@ let LineMarker: LineMarkerClass | null = null;
 // Текущий набор колонок, который сервер впечатал в страницу.
 declare var reportedPaths: string[];
 
+// Переключение светлой/тёмной темы (data-theme на <html>).
+function toggleTheme(): void
+{
+    const root = document.documentElement;
+    root.setAttribute("data-theme", root.getAttribute("data-theme") === "dark" ? "" : "dark");
+}
+
+// Фильтр из тулбара: приглушаем строки, не совпавшие с запросом.
+function onFilter(query: string): void
+{
+    const q = query.trim().toLowerCase();
+    const rows = document.getElementsByClassName("item");
+    for (let i = 0; i < rows.length; i++)
+    {
+        const row = rows[i] as HTMLElement;
+        const hit = !q || row.innerText.toLowerCase().indexOf(q) >= 0;
+        row.style.opacity = hit ? "" : ".28";
+    }
+}
+
+// Всплывающее уведомление вместо alert().
+function toast(message: string, isError: boolean = false): void
+{
+    const box = document.getElementById("toasts");
+    if (!box)
+    {
+        return;
+    }
+
+    const el = document.createElement("div");
+    el.className = isError ? "toast err" : "toast";
+    el.innerHTML = `<span class="tdot"></span>${message}`;
+    box.appendChild(el);
+
+    setTimeout(() =>
+    {
+        el.style.transition = "opacity .3s";
+        el.style.opacity = "0";
+        setTimeout(() => el.remove(), 320);
+    }, 2600);
+}
+
 // Клик по иконке ↻ у item'а 1-го уровня: просим сервер перечитать поддерево
 // и отдать готовые <tr> (POST /refresh/{id}/rows), затем заменяем ими старые.
 async function OnRefreshClick(id: number): Promise<void>
@@ -18,10 +60,17 @@ async function OnRefreshClick(id: number): Promise<void>
     }
 
     // Локальная функция — нужна только здесь. Строка корня + все её потомки
-    // (по цепочке childOf_).
+    // (по цепочке childOf_). Корень ищем заново каждый раз, чтобы после замены
+    // собрать уже новые строки, а не удалённые старые.
     function collectSubtreeRows(): HTMLTableRowElement[]
     {
-        const rows: HTMLTableRowElement[] = [rootRow];
+        const rows: HTMLTableRowElement[] = [];
+
+        const root = document.getElementById(`${id}`) as HTMLTableRowElement | null;
+        if (root)
+        {
+            rows.push(root);
+        }
 
         const walk = (ownerId: number) =>
         {
@@ -39,17 +88,20 @@ async function OnRefreshClick(id: number): Promise<void>
         return rows;
     }
 
+    const icon = rootRow.querySelector(".refresh") as HTMLElement | null;
+    icon?.classList.add("spinning");
+
     try
     {
         const response = await fetch(`refresh/${id}/rows`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ columns: reportedPaths, color: rootRow.style.backgroundColor })
+            body: JSON.stringify({ columns: reportedPaths, color: rootRow.style.getPropertyValue("--rail") })
         });
 
         if (!response.ok)
         {
-            alert(`Refresh failed: ${response.status}`);
+            toast(`Не удалось обновить item ${id}: ${response.status}`, true);
             return;
         }
 
@@ -62,10 +114,24 @@ async function OnRefreshClick(id: number): Promise<void>
         {
             row.remove();
         }
+
+        // Подсвечиваем свежие строки (старые уже удалены → соберём заново).
+        for (const row of collectSubtreeRows())
+        {
+            row.classList.remove("flash");
+            void row.offsetWidth;
+            row.classList.add("flash");
+        }
+
+        toast(`Item ${id} обновлён с Azure`);
     }
     catch (error)
     {
-        alert(`Refresh error: ${error}`);
+        toast(`Ошибка обновления item ${id}: ${error}`, true);
+    }
+    finally
+    {
+        icon?.classList.remove("spinning");
     }
 }
 
