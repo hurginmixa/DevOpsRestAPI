@@ -4,21 +4,64 @@
 
 let LineMarker: LineMarkerClass | null = null;
 
-// Клик по иконке ↻ у item'а 1-го уровня: запрашиваем поддерево с сервера
-// (POST /refresh/{id}) и показываем полученный JSON в messagebox.
+// Текущий набор колонок, который сервер впечатал в страницу.
+declare var reportedPaths: string[];
+
+// Клик по иконке ↻ у item'а 1-го уровня: просим сервер перечитать поддерево
+// и отдать готовые <tr> (POST /refresh/{id}/rows), затем заменяем ими старые.
 async function OnRefreshClick(id: number): Promise<void>
 {
+    const rootRow = document.getElementById(`${id}`) as HTMLTableRowElement | null;
+    if (!rootRow)
+    {
+        return;
+    }
+
+    // Локальная функция — нужна только здесь. Строка корня + все её потомки
+    // (по цепочке childOf_).
+    function collectSubtreeRows(): HTMLTableRowElement[]
+    {
+        const rows: HTMLTableRowElement[] = [rootRow];
+
+        const walk = (ownerId: number) =>
+        {
+            const children = document.getElementsByClassName(`childOf_${ownerId}`);
+            for (let i = 0; i < children.length; i++)
+            {
+                const child = children[i] as HTMLTableRowElement;
+                rows.push(child);
+                walk(+child.id);
+            }
+        };
+
+        walk(id);
+
+        return rows;
+    }
+
     try
     {
-        const response = await fetch(`refresh/${id}`, { method: "POST" });
+        const response = await fetch(`refresh/${id}/rows`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ columns: reportedPaths, color: rootRow.style.backgroundColor })
+        });
+
         if (!response.ok)
         {
             alert(`Refresh failed: ${response.status}`);
             return;
         }
 
-        const data = await response.json();
-        alert(JSON.stringify(data, null, 4));
+        const html = await response.text();
+
+        // Вставляем новые строки перед корнем, затем удаляем старое поддерево.
+        const oldRows = collectSubtreeRows();
+        rootRow.insertAdjacentHTML("beforebegin", html);
+        for (const row of oldRows)
+        {
+            row.remove();
+        }
     }
     catch (error)
     {

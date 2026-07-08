@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Web;
 using CommonCode;
 using CommonCode.DocumentClasses;
@@ -51,6 +52,10 @@ namespace ItemsReport
                 .OrderBy(s => s.Prior).ThenBy(s => s.S)
                 .Select(s => s.S)
                 .ToArray();
+
+            // Отдаём клиенту текущий набор колонок — TS шлёт его обратно при
+            // перерисовке (POST /refresh/{id}/rows), чтобы выровнять <td>.
+            textWriter.WriteLine($"<script>var reportedPaths = {JsonSerializer.Serialize(reportedPaths)};</script>");
 
             textWriter.WriteLine("<thead>");
             textWriter.WriteLine("<tr>");
