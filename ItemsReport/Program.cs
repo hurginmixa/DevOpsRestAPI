@@ -6,7 +6,9 @@ using CommonCode;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Config config = Config.GetConfig("Config.json");
+string configFileName = args.Length >= 1 ? args[0] : "Config.json";
+
+Config config = Config.GetConfig(configFileName);
 
 builder.Services.AddControllers();
 builder.Services.AddSingleton(config);
