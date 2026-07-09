@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CommonCode.DocumentClasses;
 using CommonCode.DocumentClasses.SerializeClasses;
@@ -51,6 +53,19 @@ namespace ItemsReport.Controllers
             string color = string.IsNullOrEmpty(request?.Color) ? "white" : request.Color;
 
             string html = PrinterHtml.RenderRows(new[] { item }, columns, color, 0, 0);
+
+            // Триггеры полной перезагрузки на клиенте: если в поддереве появился
+            // PR в ветку вне текущих колонок — нужна новая колонка (её знает только
+            // полный рендер); если сменилась секция Completed <-> Not completed —
+            // строку надо перенести. Оба случая частичный свап отразить не может,
+            // поэтому отдаём клиенту факты, а он решает про location.reload().
+            string[] branches = item.GetFullPullRequestList()
+                .Select(pr => pr.Request.TargetRefName)
+                .Distinct()
+                .ToArray();
+
+            Response.Headers["X-Branches"] = JsonSerializer.Serialize(branches);
+            Response.Headers["X-Active"] = item.HasActiveSubItems ? "true" : "false";
 
             return Content(html, "text/html");
         }

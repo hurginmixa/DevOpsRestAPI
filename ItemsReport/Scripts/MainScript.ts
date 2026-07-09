@@ -46,6 +46,40 @@ function toast(message: string, isError: boolean = false): void
     }, 2600);
 }
 
+// Решает, нужна ли полная перезагрузка вместо частичного свапа. Сервер прислал
+// в заголовках все ветки поддерева (X-Branches) и признак секции (X-Active).
+// (а) ветка вне текущих колонок → нужна новая колонка (её знает только полный
+// рендер); (б) секция сменилась → строку надо перенести между Not completed и
+// Completed. Текущую секцию строки читаем по наличию бейджа .has в её State.
+function needsFullReload(response: Response, rootRow: HTMLTableRowElement): boolean
+{
+    const branchesHeader = response.headers.get("X-Branches");
+    if (branchesHeader)
+    {
+        const branches: string[] = JSON.parse(branchesHeader);
+        for (const branch of branches)
+        {
+            if (reportedPaths.indexOf(branch) < 0)
+            {
+                return true;
+            }
+        }
+    }
+
+    const activeHeader = response.headers.get("X-Active");
+    if (activeHeader)
+    {
+        const nowActive = activeHeader === "true";
+        const wasActive = rootRow.querySelector(".has") !== null;
+        if (nowActive !== wasActive)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // Клик по иконке ↻ у item'а 1-го уровня: просим сервер перечитать поддерево
 // и отдать готовые <tr> (POST /refresh/{id}/rows), затем заменяем ими старые.
 async function OnRefreshClick(id: number): Promise<void>
@@ -99,6 +133,16 @@ async function OnRefreshClick(id: number): Promise<void>
         if (!response.ok)
         {
             toast(`Не удалось обновить item ${id}: ${response.status}`, true);
+            return;
+        }
+
+        // Reload-триггеры: частичный свап не может отразить (а) появление PR в
+        // ветку вне текущих колонок и (б) смену секции Completed <-> Not completed.
+        // Сервер прислал факты в заголовках — в этих случаях перезагружаем страницу.
+        if (needsFullReload(response, rootRow))
+        {
+            toast(`Item ${id} изменился — перезагружаю страницу…`);
+            location.reload();
             return;
         }
 
