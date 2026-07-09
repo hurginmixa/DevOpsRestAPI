@@ -325,6 +325,10 @@ namespace ItemsReport
   * { box-sizing: border-box; }
   body {
     margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     background: var(--bg);
     color: var(--ink);
     font-family: var(--sans);
@@ -334,7 +338,7 @@ namespace ItemsReport
   }
 
   .toolbar {
-    position: sticky; top: 0; z-index: 30;
+    flex: none; z-index: 30;
     display: flex; align-items: center; gap: 14px;
     min-height: 53px; padding: 10px 20px;
     background: color-mix(in srgb, var(--surface) 88%, transparent);
@@ -366,9 +370,9 @@ namespace ItemsReport
   .btn.icon { padding: 7px; }
   .btn svg { width: 15px; height: 15px; }
 
-  .board { padding: 18px 20px 60px; }
+  .board { flex: 1; min-height: 0; padding: 18px 20px 20px; }
   .scroller {
-    overflow: auto; max-height: calc(100vh - 96px); background: var(--surface);
+    overflow: auto; max-height: 100%; background: var(--surface);
     border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
   }
   table { border-collapse: collapse; width: 100%; min-width: 900px; }
